@@ -24,11 +24,6 @@ class ROME:
         self.selector_stepper = None
         self.selector_endstop = None
 
-        self.cut_with_dual_blade_mod = bool(self.config.getfloat('cut_with_dual_blade_mod', 0))
-        self.cut_if_cant_enter_bowden = bool(self.config.getfloat('cut_if_cant_enter_bowden', 0))
-        self.cut_after_unload = bool(self.config.getfloat('cut_after_unload', 0))
-        self.clean_selector = bool(self.config.getfloat('clean_selector', 0))
-
         self.print_temperature = self.config.getfloat('print_temperature', 240)
         self.unload_temperature = self.config.getfloat('unload_temperature', 200)
 
@@ -110,7 +105,6 @@ class ROME:
     # GCode Registration
     # -----------------------------------------------------------------------------------------------------------------------------
     def register_commands(self):
-        self.gcode.register_command('CUT_FILAMENT', self.cmd_CUT_FILAMENT, desc=("CUT_FILAMENT"))
         self.gcode.register_command('LOAD_TOOL', self.cmd_LOAD_TOOL, desc=("LOAD_TOOL"))
         self.gcode.register_command('CHANGE_TOOL', self.cmd_CHANGE_TOOL, desc=("CHANGE_TOOL"))
         self.gcode.register_command('UNLOAD_TOOL', self.cmd_UNLOAD_TOOL, desc=("UNLOAD_TOOL"))
@@ -177,10 +171,6 @@ class ROME:
         else:
             self.Wipe_Tower = False
         self.gcode.run_script_from_command("_START_PRINT_MMU TOOL=" + str(TOOL) + " BED_TEMP=" + str(BED_TEMP) + " EXTRUDER_TEMP=" + str(EXTRUDER_TEMP))
-
-    def cmd_CUT_FILAMENT(self, param):
-        TOOL = param.get_int('TOOL', None, minval=0, maxval=4)
-        self._cut(TOOL)
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Home
@@ -381,14 +371,6 @@ class ROME:
             if not self._from_selector_to_parking_position():
                 return False
 
-        # clean selector
-        if self.clean_selector and is_filament_change:
-            self._clean_selector()
-
-        # cut filament
-        if self.cut_after_unload and is_filament_change:
-            self._cut(self.Selected_Filament)
-
         # success
         self.Selected_Tool = -1
         self.Selected_Filament = -1
@@ -429,14 +411,6 @@ class ROME:
         self.gcode.run_script_from_command('G4 P500')
         self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' Y' + str(self.exchange_old_position[1]) + ' F' + str(self.exchange_travel_speed * 60))
         self.gcode.run_script_from_command('G0 Z' + str(self.exchange_old_position[2]) + ' F' + str(self.exchange_lift_speed * 60))
-
-    def _clean_selector(self):
-        self.stepper_move(self.selector_stepper, 2, True, (self.selector_selecting_speed / 3), self.selector_selecting_accel)
-        self.stepper_move(self.selector_stepper, 75, True, (self.selector_selecting_speed / 3), self.selector_selecting_accel)
-        self.stepper_move(self.selector_stepper, 2, True, (self.selector_selecting_speed / 2), self.selector_selecting_accel)
-        self.stepper_move(self.selector_stepper, 75, True, (self.selector_selecting_speed / 2), self.selector_selecting_accel)
-        self.stepper_move(self.selector_stepper, 2, True, self.selector_selecting_speed, self.selector_selecting_accel)
-        self.stepper_move(self.selector_stepper, 75, True, self.selector_selecting_speed, self.selector_selecting_accel)
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # MMU State 
@@ -505,8 +479,6 @@ class ROME:
         if not self._test_selector_bowden_tube():
             if self._fix_filament_position_in_selector():
                 return False
-            if self.cut_if_cant_enter_bowden:
-                self._cut(tool)
             if not self._push_filament_in_bowden():
                 self._fix_filament_position_in_selector()
                 return False
@@ -584,39 +556,6 @@ class ROME:
 
         # success
         return True
-
-    def _cut(self, tool):
-    
-        # raise stepper power
-        driver_status = self.stepper_driver_status('selector_stepper')
-        self.gcode.run_script_from_command('SET_TMC_CURRENT STEPPER=selector_stepper CURRENT=' + str(driver_status['run_current'] * 1.25) + ' HOLDCURRENT=' + str(driver_status['hold_current'] * 1.25))
-
-        # move selector to home position
-        self.stepper_move(self.selector_stepper, 0, True, self.selector_selecting_speed, self.selector_selecting_accel)
-
-        # select filament
-        self.select_idler(tool)
-        self.gear_stepper.do_set_position(0.0)
-        self.stepper_move(self.gear_stepper, 15, True, self.selector_loading_speed, self.selector_loading_accel)
-
-        # cut
-        self.stepper_move(self.selector_stepper, 75, True, self.selector_selecting_speed, self.selector_selecting_accel)
-        if self.cut_with_dual_blade_mod:
-            self.stepper_move(self.selector_stepper, 0, True, self.selector_selecting_speed, self.selector_selecting_accel)
-
-        # reset stepper power
-        self.gcode.run_script_from_command('SET_TMC_CURRENT STEPPER=selector_stepper CURRENT=' + str(driver_status['run_current']) + ' HOLDCURRENT=' + str(driver_status['hold_current']))
-
-        # park filament
-        self.gear_stepper.do_set_position(0.0)
-        self.stepper_move(self.gear_stepper, -10, True, self.selector_loading_speed, self.selector_loading_accel)
-
-        # home selector
-        if not self.cut_with_dual_blade_mod:
-            self.stepper_move(self.selector_stepper, 0, True, self.selector_selecting_speed, self.selector_selecting_accel)
-
-        # release idler
-        self.unselect_tool()
 
     def _push_filament_in_bowden(self):
         

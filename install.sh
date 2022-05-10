@@ -59,7 +59,6 @@ function link_rome_macros {
             ln -sf "${SRCDIR}/klipper_macro/exchange.cfg" "${ROME_DIR}/exchange.cfg"
             ln -sf "${SRCDIR}/klipper_macro/hardware.cfg" "${ROME_DIR}/hardware.cfg"
             ln -sf "${SRCDIR}/klipper_macro/macros.cfg" "${ROME_DIR}/macros.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/ERCF_FORM_TIP_STANDALONE.cfg" "${ROME_DIR}/ERCF_FORM_TIP_STANDALONE.cfg"
         else
             echo -e "ERROR: ${ROME_DIR} not found."
             exit 1
