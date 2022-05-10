@@ -49,7 +49,6 @@ function link_rome_macros {
         if [ -d "${ROME_DIR}" ]; then
             echo "Linking macro files..."
             ln -sf "${SRCDIR}/klipper_macro/config.cfg" "${ROME_DIR}/config.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/exchange.cfg" "${ROME_DIR}/exchange.cfg"
             ln -sf "${SRCDIR}/klipper_macro/hardware.cfg" "${ROME_DIR}/hardware.cfg"
             ln -sf "${SRCDIR}/klipper_macro/macros.cfg" "${ROME_DIR}/macros.cfg"
         else
