@@ -15,8 +15,6 @@ SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/ && pwd )"
 KLIPPER_CONFIG_DIR="${HOME}/klipper_config"
 KLIPPY_EXTRAS="${HOME}/klipper/klippy/extras"
 ROME_DIR="${HOME}/klipper_config/rome"
-ROME_MACROS_DIR="${HOME}/klipper_config/rome/macros"
-ROME_HARDWARE_DIR="${HOME}/klipper_config/rome/hardware"
 
 function stop_klipper {
     if [ "$(sudo systemctl list-units --full -all -t service --no-legend | grep -F "klipper.service")" ]; then
@@ -40,11 +38,6 @@ function create_rome_dir {
     if [ -d "${KLIPPER_CONFIG_DIR}" ]; then
         echo "Creating rome folder..."
         mkdir "${ROME_DIR}"
-        mkdir "${ROME_MACROS_DIR}"
-        mkdir "${ROME_MACROS_DIR}/tools"
-        mkdir "${ROME_MACROS_DIR}/print"
-        mkdir "${ROME_MACROS_DIR}/load"
-        mkdir "${ROME_HARDWARE_DIR}"
     else
         echo -e "ERROR: ${KLIPPER_CONFIG_DIR} not found."
         exit 1

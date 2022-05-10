@@ -4,6 +4,8 @@ from re import T
 
 class ROME:
 
+    # SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=extruder
+
     # -----------------------------------------------------------------------------------------------------------------------------
     # Initialize
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -12,7 +14,7 @@ class ROME:
         self.printer = self.config.get_printer()
         self.reactor = self.printer.get_reactor()
         self.gcode = self.printer.lookup_object('gcode')
-        self.extruder_filament_sensor = self.printer.lookup_object("filament_switch_sensor extruder_filament_sensor")
+        #self.extruder_filament_sensor = self.printer.lookup_object("filament_switch_sensor extruder_filament_sensor")
 
         self.load_settings()
         self.register_commands()
@@ -66,20 +68,20 @@ class ROME:
         self.pheaters = self.printer.lookup_object('heaters')
         self.heater = self.extruder.get_heater()
 
-        for manual_stepper in self.printer.lookup_objects('manual_stepper'):
-            rail_name = manual_stepper[1].get_steppers()[0].get_name()
-            if rail_name == 'manual_stepper selector_stepper':
-                self.selector_stepper = manual_stepper[1]
-            if rail_name == 'manual_stepper idler_stepper':
-                self.idler_stepper = manual_stepper[1]
-            if rail_name == 'manual_stepper gear_stepper':
-                self.gear_stepper = manual_stepper[1]
-        if self.selector_stepper is None:
-            raise self.config.error("Selector Stepper not found!")
-        if self.idler_stepper is None:
-            raise self.config.error("Idler Stepper not found!")
-        if self.gear_stepper is None:
-            raise self.config.error("Gear Stepper not found!")
+        # for manual_stepper in self.printer.lookup_objects('manual_stepper'):
+        #     rail_name = manual_stepper[1].get_steppers()[0].get_name()
+        #     if rail_name == 'manual_stepper selector_stepper':
+        #         self.selector_stepper = manual_stepper[1]
+        #     if rail_name == 'manual_stepper idler_stepper':
+        #         self.idler_stepper = manual_stepper[1]
+        #     if rail_name == 'manual_stepper gear_stepper':
+        #         self.gear_stepper = manual_stepper[1]
+        # if self.selector_stepper is None:
+        #     raise self.config.error("Selector Stepper not found!")
+        # if self.idler_stepper is None:
+        #     raise self.config.error("Idler Stepper not found!")
+        # if self.gear_stepper is None:
+        #     raise self.config.error("Gear Stepper not found!")
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Heater Timeout Handler
@@ -651,6 +653,8 @@ class ROME:
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('M400')
 
+        # MANUAL_STEPPER STEPPER=rome_extruder_1 MOVE=50
+
         # success
         return True
 
@@ -838,11 +842,12 @@ class ROME:
         state = endstop.query_endstop(self.toolhead.get_last_move_time())
         return bool(state)
 
-    def set_filament_sensor(self, enabled):
-        self.extruder_filament_sensor.runout_helper.sensor_enabled = enabled
+    # def set_filament_sensor(self, enabled):
+    #     self.extruder_filament_sensor.runout_helper.sensor_enabled = enabled
 
     def filament_sensor_triggered(self):
-        return bool(self.extruder_filament_sensor.runout_helper.filament_present)
+        return True
+        #return bool(self.extruder_filament_sensor.runout_helper.filament_present)
 
     def extruder_set_temperature(self, temperature, wait):
         self.pheaters.set_temperature(self.heater, temperature, wait)
