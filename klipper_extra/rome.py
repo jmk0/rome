@@ -22,20 +22,18 @@ class ROME:
     def load_settings(self):
         self.tool_count = 2
 
-        self.print_temperature = self.config.getfloat('print_temperature', 240)
-        self.unload_temperature = self.config.getfloat('unload_temperature', 200)
         self.heater_timeout = self.config.getfloat('heater_timeout', 600.0)
         self.unload_after_print = self.config.getfloat('unload_after_print', 1)
 
         self.nozzle_loading_speed_mms = self.config.getfloat('nozzle_loading_speed_mms', 10.0)
         self.filament_homing_speed_mms = self.config.getfloat('filament_homing_speed_mms', 75.0)
-        self.filament_parking_speed_mms = self.config.getfloat('filament_parking_speed_mms', 75.0)
 
         self.sensor_to_reverse_bowden_parking_position_mm = self.config.getfloat('sensor_to_reverse_bowden_parking_position_mm', 100.0)
-
         self.sensor_to_extruder_gear_mm = self.config.getfloat('sensor_to_extruder_gear_mm', 45.0)
         self.extruder_gear_to_parking_position_mm = self.config.getfloat('extruder_gear_to_parking_position_mm', 40.0)
         self.parking_position_to_nozzle_mm = self.config.getfloat('parking_position_to_nozzle_mm', 65.0)
+
+        self.wipe_tower_acceleration = self.config.getfloat('wipe_tower_acceleration', 65.0)
 
     def register_handle_connect(self):
         self.printer.register_event_handler("klippy:connect", self.execute_handle_connect)
@@ -122,29 +120,12 @@ class ROME:
 
     def cmd_ROME_START_PRINT(self, param):
         self.Tool_Swaps = 0
-        self.Mode = "SLICER"
-        self.COOLING_TUBE_RETRACTION = 0
-        self.COOLING_TUBE_LENGTH = 0
-        self.PARKING_POS_RETRACTION = 0
-        self.EXTRA_LOADING_MOVE = 0
         self.exchange_old_position = None
 
-        if param.get('WIPE_TOWER', None, str) == 'true':
-            self.wipe_tower = True
-        else:
-            self.wipe_tower = False
         self.wipe_tower_x = param.get_float('WIPE_TOWER_X', None, minval=0, maxval=999) 
         self.wipe_tower_y = param.get_float('WIPE_TOWER_Y', None, minval=0, maxval=999)
         self.wipe_tower_width = param.get_float('WIPE_TOWER_WIDTH', None, minval=0, maxval=999)
         self.wipe_tower_rotation_angle = param.get_float('WIPE_TOWER_ROTATION_ANGLE', None, minval=-360, maxval=360)
-
-        COOLING_TUBE_RETRACTION = param.get_int('COOLING_TUBE_RETRACTION', None, minval=0, maxval=999)
-        COOLING_TUBE_LENGTH = param.get_int('COOLING_TUBE_LENGTH', None, minval=0, maxval=999)
-        PARKING_POS_RETRACTION = param.get_int('PARKING_POS_RETRACTION', None, minval=0, maxval=999)
-        EXTRA_LOADING_MOVE = param.get_int('EXTRA_LOADING_MOVE', None, minval=-999, maxval=999)
-        # if COOLING_TUBE_RETRACTION == 0 and COOLING_TUBE_LENGTH == 0 and PARKING_POS_RETRACTION == 0 and EXTRA_LOADING_MOVE == 0:
-        #     self.Mode = "ROME"
-        self.Mode = "ROME"
 
         TOOL = param.get_int('TOOL', None, minval=0, maxval=4)
         BED_TEMP = param.get_int('BED_TEMP', None, minval=-1, maxval=self.heater.max_temp)
@@ -231,13 +212,13 @@ class ROME:
     def change_tool(self, tool):
         if self.Tool_Swaps > 0:
             self.before_change()
-            if not self.load_tool(tool, -1, True):
+            if not self.load_tool(tool, -1):
                 return False
             self.after_change()
         self.Tool_Swaps = self.Tool_Swaps + 1
         return True
 
-    def load_tool(self, tool, temp=-1, is_filament_change=False):
+    def load_tool(self, tool, temp=-1):
         self.respond("Load Tool " + str(tool))
 
         # check selected temperature
@@ -432,7 +413,7 @@ class ROME:
         
         # move filament to extruder gears
         self.gcode.run_script_from_command('G92 E0')
-        if self.use_brush or self.exchange_old_position == None:
+        if self.exchange_old_position == None:
             self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_extruder_gear_mm + self.extruder_gear_to_parking_position_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_extruder_gear_mm) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
@@ -443,24 +424,18 @@ class ROME:
         return True
 
     def load_from_parking_position_to_nozzle(self):
-        if self.Mode == "ROME" or self.Tool_Swaps == 0:
+        self.respond("load_from_parking_position_to_nozzle")
 
-            self.respond("load_from_parking_position_to_nozzle")
-    
-            # wait for printing temperature
-            if self.unload_temperature > 0:
-                self.extruder_set_temperature(self.print_temperature, True)
-
-            # load filament into nozzle
-            self.gcode.run_script_from_command('G92 E0')
-            if self.use_brush or self.exchange_old_position == None:
-                self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
-            else:
-                self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
-                self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.nozzle_loading_speed_mms * 60))
-            self.gcode.run_script_from_command('G4 P1000')
-            self.gcode.run_script_from_command('G92 E0')
-            self.gcode.run_script_from_command('M400')
+        # load filament into nozzle
+        self.gcode.run_script_from_command('G92 E0')
+        if self.exchange_old_position == None:
+            self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
+        else:
+            self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
+            self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.nozzle_loading_speed_mms * 60))
+        self.gcode.run_script_from_command('G4 P1000')
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('M400')
 
         # success
         return True
@@ -549,57 +524,22 @@ class ROME:
     # -----------------------------------------------------------------------------------------------------------------------------
     # Exchange 
     # -----------------------------------------------------------------------------------------------------------------------------
-    Mode = "ROME"
+    ooze_move_x = 0
+
     exchange_lift_speed = 60
     exchange_travel_speed = 750
     exchange_old_position = None
     exchange_safe_z = 0
 
-    COOLING_TUBE_RETRACTION = 0
-    COOLING_TUBE_LENGTH = 0
-    PARKING_POS_RETRACTION = 0
-    EXTRA_LOADING_MOVE = 0
+    wipe_tower_x = 170
+    wipe_tower_y = 140
+    wipe_tower_width = 60
+    wipe_tower_rotation_angle = 0
 
     def before_change(self):
-        if self.Mode == "ROME":
-            if self.use_brush:
-                self.before_change_rome_brush()
-            else:
-                self.before_change_rome()
-        elif self.Mode == "SLICER":
-            self.before_change_slicer()
-        
-    def after_change(self):
-        if self.Mode == "ROME":
-            if self.use_brush:
-                self.after_change_rome_brush()
-            else:
-                self.after_change_rome()
-        elif self.Mode == "SLICER":
-            self.after_change_slicer()
-
-    # -----------------------------------------------------------------------------------------------------------------------------
-    # ROME
-    # -----------------------------------------------------------------------------------------------------------------------------
-
-    brush_z = 23
-    brush_x0 = 270
-    brush_y0 = 290
-    brush_x1 = 300
-    brush_y1 = 270
-    brush_speed = 100
-
-    use_brush = False
-
-    ooze_move_x = 0
-
-    def before_change_rome(self):
         self.respond("before_change_rome")
         self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
         self.exchange_old_position = self.toolhead.get_position()
-
-        self.respond("self.exchange_old_position[0] = " + str(self.exchange_old_position[0]))
-        self.respond("wipe_tower_x = " + str(self.wipe_tower_x))
 
         x_offset = abs(self.exchange_old_position[0] - self.wipe_tower_x)
         if x_offset < 10:
@@ -607,95 +547,39 @@ class ROME:
         else:
             self.ooze_move_x = self.exchange_old_position[0] - self.wipe_tower_width
 
-        self.gcode.run_script_from_command('M204 S2500')
+        self.gcode.run_script_from_command('M204 S' + str(self.wipe_tower_acceleration))
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('G0 E-2 F' + str(self.exchange_travel_speed * 60))
-        #self.gcode.run_script_from_command('G0 E-2 X150 F' + str(self.exchange_travel_speed * 60))
-        #self.gcode.run_script_from_command('G0 E-2 X' + str(self.exchange_old_position[0]) + ' F' + str(self.exchange_travel_speed * 60))
         self.gcode.run_script_from_command('M400')
-
-    def after_change_rome(self):
+        
+    def after_change(self):
         self.respond("after_change_rome")
-        self.select_tool(self.Selected_Tool)
-
-    def before_change_rome_brush(self):
-        self.respond("before_change_rome_brush")
-        self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
-        self.exchange_old_position = self.toolhead.get_position()
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-2 X150 F' + str(self.exchange_travel_speed * 60))
-        self.exchange_safe_z = self.exchange_old_position[2] + 5
-        if self.exchange_safe_z < self.brush_z + 5:
-            self.exchange_safe_z = self.brush_z + 5
-        self.gcode.run_script_from_command('G0 Z' + str(self.exchange_safe_z) + ' F' + str(self.exchange_lift_speed * 60))
-        self.gcode.run_script_from_command('G0 X' + str(self.brush_x0) + ' Y' + str(self.brush_y1 + ((self.brush_y0 - self.brush_y1) / 2)) + ' F' + str(self.exchange_travel_speed * 60))
-        self.gcode.run_script_from_command('G0 Z' + str(self.brush_z) + ' F' + str(self.exchange_lift_speed * 60))
-        self.gcode.run_script_from_command('G0 X300 Y300 F' + str(self.exchange_travel_speed * 60))
-        self.gcode.run_script_from_command('M400')
-
-    def after_change_rome_brush(self):
-        self.respond("after_change_rome_brush")
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-2 X' + str(self.brush_x1) + ' Y' + str(self.brush_y1) + ' F' + str(self.brush_speed * 60))
-        self.gcode.run_script_from_command('G0 X' + str(self.brush_x0) + ' Y' + str(self.brush_y1) + ' F' + str(self.brush_speed * 60))
-        self.gcode.run_script_from_command('G0 Z' + str(self.exchange_safe_z) + ' F' + str(self.exchange_lift_speed * 60))
-        self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' F' + str(self.exchange_travel_speed * 60))
-        self.gcode.run_script_from_command('G0 Y' + str(self.exchange_old_position[1]) + ' F' + str(self.exchange_travel_speed * 60))
-        self.gcode.run_script_from_command('G0 Z' + str(self.exchange_old_position[2]) + ' F' + str(self.exchange_travel_speed * 60))
-        self.gcode.run_script_from_command('M400')
-
-    # -----------------------------------------------------------------------------------------------------------------------------
-    # SLICER
-    # -----------------------------------------------------------------------------------------------------------------------------
-    wipe_tower = False
-    wipe_tower_x = 170
-    wipe_tower_y = 140
-    wipe_tower_brim = 0
-    wipe_tower_width = 60
-    wipe_tower_rotation_angle = 0
-    wipe_tower_bridging = 10
-    wipe_tower_no_sparse_layers = 0
-    single_extruder_multi_material_priming = 0
-
-    def before_change_slicer(self):
-        self.respond("before_change_slicer")
-        self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E15 F600')
-        self.gcode.run_script_from_command('G92 E0')
-
-    def after_change_slicer(self):
-        self.respond("after_change_slicer")
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # unload from nozzle
     # -----------------------------------------------------------------------------------------------------------------------------
 
     def unload_from_nozzle_to_parking_position(self):
-        if self.Mode == "ROME":
-            self.respond("unload_from_nozzle_to_parking_position")
-            if self.use_brush or self.exchange_old_position == None:
-                self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
-            else:
-                self.gcode.run_script_from_command('G92 E0')
-                self.gcode.run_script_from_command('G0 E-15 X' + str(self.ooze_move_x) + ' F3600')
-                self.gcode.run_script_from_command('M400')
-                self.gcode.run_script_from_command('G4 P3000')
-                self.gcode.run_script_from_command('G92 E0')
-                self.gcode.run_script_from_command('G0 E15 X' + str(self.exchange_old_position[0]) + ' F600')
-                self.gcode.run_script_from_command('M400')
-                self.gcode.run_script_from_command('G4 P200')
-                self.gcode.run_script_from_command('G92 E0')
-                self.gcode.run_script_from_command('G0 E-15 X' + str(self.ooze_move_x) + ' F3600')
-                self.gcode.run_script_from_command('M400')
-                self.gcode.run_script_from_command('G4 P3000')
-                self.gcode.run_script_from_command('G92 E0')
-                self.gcode.run_script_from_command('G0 E15 X' + str(self.exchange_old_position[0]) + ' F600')
-                self.gcode.run_script_from_command('M400')
-                self.gcode.run_script_from_command('G4 P200')
-                self.gcode.run_script_from_command('G92 E0')
-                self.gcode.run_script_from_command('G0 E-30 X' + str(self.ooze_move_x) + ' F4500')
-                self.gcode.run_script_from_command('M400')
+        self.respond("unload_from_nozzle_to_parking_position")
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E-15 X' + str(self.ooze_move_x) + ' F3600')
+        self.gcode.run_script_from_command('M400')
+        self.gcode.run_script_from_command('G4 P3000')
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E15 X' + str(self.exchange_old_position[0]) + ' F600')
+        self.gcode.run_script_from_command('M400')
+        self.gcode.run_script_from_command('G4 P200')
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E-15 X' + str(self.ooze_move_x) + ' F3600')
+        self.gcode.run_script_from_command('M400')
+        self.gcode.run_script_from_command('G4 P3000')
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E15 X' + str(self.exchange_old_position[0]) + ' F600')
+        self.gcode.run_script_from_command('M400')
+        self.gcode.run_script_from_command('G4 P200')
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E-30 X' + str(self.ooze_move_x) + ' F4500')
+        self.gcode.run_script_from_command('M400')
 
     def unload_from_parking_position_to_reverse_bowden(self, tool=-1):
         self.respond("unload_from_parking_position_to_reverse_bowden tool=" + str(tool))
@@ -713,32 +597,7 @@ class ROME:
         else:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
             self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
-            # self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm) + ' X' + str(self.ooze_move_x) + ' F' + str(self.filament_homing_speed_mms * 60))
-            # self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_reverse_bowden_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
-
-        # check if filament is ejected
-        if self.filament_sensor_triggered():
-            return False
-
-        return True
-
-    # -----------------------------------------------------------------------------------------------------------------------------
-    # move from nozzle to toolhead sensor
-    # -----------------------------------------------------------------------------------------------------------------------------
-    def move_from_nozzle_to_toolhead_sensor(self):
-        self.respond("move_from_nozzle_to_toolhead_sensor")
-
-        # eject filament from extruder
-        if self.filament_sensor_triggered():
-            step_distance = 20
-            max_step_count = 30
-            for i in range(max_step_count):
-                self.gcode.run_script_from_command('G92 E0')
-                self.gcode.run_script_from_command('G0 E-' + str(step_distance) + ' F' + str(self.filament_parking_speed_mms * 60))
-                self.gcode.run_script_from_command('M400')
-                if not self.filament_sensor_triggered():
-                    break
 
         # check if filament is ejected
         if self.filament_sensor_triggered():
