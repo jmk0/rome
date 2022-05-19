@@ -5,6 +5,8 @@ from re import T
 
 class ROME:
 
+    origin = "rome"
+
     # -----------------------------------------------------------------------------------------------------------------------------
     # Initialize
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -76,19 +78,9 @@ class ROME:
         self.gcode.register_command('CHANGE_TOOL', self.cmd_CHANGE_TOOL, desc=("CHANGE_TOOL"))
         self.gcode.register_command('ROME_END_PRINT', self.cmd_ROME_END_PRINT, desc=("ROME_END_PRINT"))
         self.gcode.register_command('ROME_START_PRINT', self.cmd_ROME_START_PRINT, desc=("ROME_START_PRINT"))
-        self.gcode.register_command('LOAD_TO_SENSOR', self.cmd_LOAD_TO_SENSOR, desc=("LOAD_TO_SENSOR"))
-
-    def cmd_LOAD_TO_SENSOR(self, param):
-        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
-        temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
-        if not self.select_tool(tool):
-            self.pause_rome()
-            return
-        if not self.load_to_toolhead_sensor(tool):
-            self.pause_rome()
-            return
 
     def cmd_LOAD_TOOL(self, param):
+        self.origin = "gcode"
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         if not self.load_tool(tool, temp):
@@ -96,6 +88,7 @@ class ROME:
             return
 
     def cmd_UNLOAD_TOOL(self, param):
+        self.origin = "gcode"
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         if not self.rome_unload_tool(tool, temp):
@@ -154,8 +147,8 @@ class ROME:
             self.respond("Can not home ROME!")
             return False
 
-        if not self.home_tools():
-            self.respond("Can not home ROME Tools!")
+        if not self.home_filaments():
+            self.respond("Can not home filaments!")
             return False
 
         self.Homed = True
@@ -191,8 +184,7 @@ class ROME:
         # success
         return True
 
-    Tools_Homed = False
-    def home_tools(self):
+    def home_filaments(self):
         if not self.load_to_toolhead_sensor(0, False):
             return False
         if not self.unload_from_toolhead_sensor(0, 30):
@@ -201,7 +193,6 @@ class ROME:
             return False
         if not self.unload_from_toolhead_sensor(1, 30):
             return False
-        self.Tools_Homed = True
         return True
 
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -210,6 +201,7 @@ class ROME:
     Tool_Swaps = 0
 
     def change_tool(self, tool):
+        self.origin = "rome"
         if self.Tool_Swaps > 0:
             self.before_change()
             if not self.load_tool(tool, -1):
@@ -304,8 +296,6 @@ class ROME:
         # unload filament
         self.select_tool(tool)
 
-        #self.unload_to_toolhead_sensor()
-        #self.unload_from_toolhead_sensor(tool)
         self.unload_from_nozzle_to_parking_position()
         if not self.unload_from_parking_position_to_reverse_bowden():
             return False
@@ -328,8 +318,6 @@ class ROME:
     def unload_known_tool(self):
         self.respond("unload_known_tool")
         self.select_tool(self.Selected_Tool)
-        #self.unload_to_toolhead_sensor()
-        #self.unload_from_toolhead_sensor(self.Selected_Tool)
         self.unload_from_nozzle_to_parking_position()
         if not self.unload_from_parking_position_to_reverse_bowden():
             return False
@@ -338,8 +326,6 @@ class ROME:
     def unload_unknown_tool(self):
         self.respond("unload_unknown_tool")
         self.select_tool()
-        #self.unload_to_toolhead_sensor()
-        #self.unload_from_toolhead_sensor()
         self.unload_from_nozzle_to_parking_position()
         if not self.unload_from_parking_position_to_reverse_bowden():
             return False
@@ -413,7 +399,7 @@ class ROME:
         
         # move filament to extruder gears
         self.gcode.run_script_from_command('G92 E0')
-        if self.exchange_old_position == None:
+        if self.origin != "rome" or self.exchange_old_position == None:
             self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_extruder_gear_mm + self.extruder_gear_to_parking_position_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_extruder_gear_mm) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
@@ -428,7 +414,7 @@ class ROME:
 
         # load filament into nozzle
         self.gcode.run_script_from_command('G92 E0')
-        if self.exchange_old_position == None:
+        if self.origin != "rome" or self.exchange_old_position == None:
             self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
@@ -561,25 +547,15 @@ class ROME:
 
     def unload_from_nozzle_to_parking_position(self):
         self.respond("unload_from_nozzle_to_parking_position")
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-15 X' + str(self.ooze_move_x) + ' F3600')
-        self.gcode.run_script_from_command('M400')
-        self.gcode.run_script_from_command('G4 P3000')
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E15 X' + str(self.exchange_old_position[0]) + ' F600')
-        self.gcode.run_script_from_command('M400')
-        self.gcode.run_script_from_command('G4 P200')
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-15 X' + str(self.ooze_move_x) + ' F3600')
-        self.gcode.run_script_from_command('M400')
-        self.gcode.run_script_from_command('G4 P3000')
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E15 X' + str(self.exchange_old_position[0]) + ' F600')
-        self.gcode.run_script_from_command('M400')
-        self.gcode.run_script_from_command('G4 P200')
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-30 X' + str(self.ooze_move_x) + ' F4500')
-        self.gcode.run_script_from_command('M400')
+
+        if self.origin != "rome": 
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
+        else:
+            self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
+            self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' F600')
+            self.gcode.run_script_from_command('G4 P1000')
+
 
     def unload_from_parking_position_to_reverse_bowden(self, tool=-1):
         self.respond("unload_from_parking_position_to_reverse_bowden tool=" + str(tool))
@@ -649,4 +625,3 @@ class ROME:
 
 def load_config(config):
     return ROME(config)
-
