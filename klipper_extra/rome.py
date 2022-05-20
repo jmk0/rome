@@ -92,9 +92,15 @@ class ROME:
         self.origin = "gcode"
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
-        if not self.rome_unload_tool(tool, temp):
-            self.pause_rome()
-            return
+
+        # set hotend temperature
+        if temp > 0:
+            self.set_hotend_temperature()
+
+        # unload tool
+        self.Selected_Filament = tool
+        self.unload_tool()
+
 
     def cmd_HOME_ROME(self, param):
         self.Homed = False
@@ -138,20 +144,25 @@ class ROME:
     Homed = False
 
     def home(self):
+
+        # homing rome
+        self.respond("Homing Rome!")
         self.Homed = False
         self.Paused = False
         self.Tool_Swaps = 0
 
+        # precheck
         if not self.can_home():
-            self.respond("Can not home ROME!")
             return False
 
-        if not self.home_filaments():
-            self.respond("Can not home filaments!")
+        # home filaments
+        if not self.home_filament(0):
+            return False
+        if not self.home_filament(1):
             return False
 
         self.Homed = True
-        self.Selected_Tool = -1
+        self.Selected_Filament = -1
 
         # success
         return True
@@ -165,9 +176,8 @@ class ROME:
 
         # check extruder
         if self.filament_sensor_triggered():
-            self.respond("Filament in extruder detected!")
 
-            # unload filament rom nozzle
+            # unload filament from nozzle
             if not self.unload_tool():
                 self.respond("Can not unload from nozzle!")
                 return False
@@ -183,29 +193,14 @@ class ROME:
         # success
         return True
 
-    def home_filaments(self):
-        if not self.load_to_toolhead_sensor(0, False):
+    def home_filament(self, filament):
+ 
+        # home filament
+        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(filament, False):
+            self.respond("Filament " + str(filament) + " cant be loaded into the toolhead sensor!")
             return False
-        if not self.home_unload_filament(0, 30):
-            return False
-        if not self.load_to_toolhead_sensor(1, False):
-            return False
-        if not self.home_unload_filament(1, 30):
-            return False
-        return True
-
-    def home_unload_filament(self, tool, offset):
-        
-        # select tool
-        self.select_tool(tool)
-
-        # eject filament
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_reverse_bowden_parking_position_mm + offset) + ' F' + str(self.filament_homing_speed_mms * 60))
-        self.gcode.run_script_from_command('M400')
-
-        # check if filament is ejected
-        if self.filament_sensor_triggered():
+        if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden(filament, 30):
+            self.respond("Filament " + str(filament) + " cant be unloaded from the toolhead sensor!")
             return False
 
         # success
@@ -238,62 +233,11 @@ class ROME:
         self.Tool_Swaps = self.Tool_Swaps + 1
         return True
 
-    def before_change(self):
-        self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
-        self.exchange_old_position = self.toolhead.get_position()
-
-        x_offset = abs(self.exchange_old_position[0] - self.wipe_tower_x)
-        if x_offset < 10:
-            self.ooze_move_x = self.wipe_tower_x + self.wipe_tower_width
-        else:
-            self.ooze_move_x = self.exchange_old_position[0] - self.wipe_tower_width
-
-        self.gcode.run_script_from_command('M204 S' + str(self.wipe_tower_acceleration))
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-2 F' + str(self.exchange_travel_speed * 60))
-        self.gcode.run_script_from_command('M400')
-        
-    def after_change(self):
-        self.respond("after_change_rome")
-
-    # -----------------------------------------------------------------------------------------------------------------------------
-    # Select Filament
-    # -----------------------------------------------------------------------------------------------------------------------------
-    Selected_Tool = -1
-
-    def select_tool(self, tool=-1):
-        self.unselect_tool()
-        if tool == 0 or tool == -1:
-            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=extruder')
-        if tool == 1 or tool == -1:
-            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_2 MOTION_QUEUE=extruder')
-        self.Selected_Tool = tool
-        return True
-
-    def unselect_tool(self):
-        self.Selected_Tool = -1
-        self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=')
-        self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_2 MOTION_QUEUE=')
-
-    # -----------------------------------------------------------------------------------------------------------------------------
-    # Load Filament
-    # -----------------------------------------------------------------------------------------------------------------------------
     def load_tool(self, tool, temp=-1):
-    
-        # check selected temperature
+        
+        # set hotend temperature
         if temp > 0:
-            if temp < self.heater.min_temp:
-                self.respond("Selected temperature " + str(temp) + " too low, must be above " + str(self.heater.min_temp))
-                return False
-            if temp > self.heater.max_temp:
-                self.respond("Selected temperature " + str(temp) + "too high, must be below " + str(self.heater.max_temp))
-                return False
-            if temp < self.heater.min_extrude_temp:
-                self.respond("Selected temperature " + str(temp) + " below minimum extrusion temperature " + str(self.heater.min_extrude_temp))
-                return False
-            # start heating
-            self.respond("Heat up nozzle to " + str(temp))
-            self.extruder_set_temperature(temp, False)
+            self.set_hotend_temperature()
 
         # home if not homed yet
         if not self.Homed:
@@ -315,26 +259,87 @@ class ROME:
         if not self.unload_tool():
             self.respond("could not unload tool!")
             return False
-        if not self.select_tool(tool):
-            self.respond("could not select tool!")
+        if not self.select_filament(tool):
+            self.respond("could not select filament!")
             return False
-        if not self.load_to_toolhead_sensor(tool):
+        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(tool):
             self.respond("could not load tool to sensor!")
             return False
-        if not self.load_from_filament_sensor_to_parking_position():
+        if not self.load_filament_from_toolhead_sensor_to_parking_position():
             self.respond("could not park filament!")
             return False
-        if not self.load_from_parking_position_to_nozzle():
+        if not self.load_filament_from_parking_position_to_nozzle():
             self.respond("could not load into nozzle!")
             return False
 
         # success
         return True
 
-    def load_to_toolhead_sensor(self, tool, exact_positioning=True):
+    def unload_tool(self):
+        if self.filament_sensor_triggered():
+            self.select_filament(self.Selected_Filament)
+            if not self.unload_filament_from_nozzle_to_parking_position():
+                return False
+            if not self.unload_filament_from_parking_position_to_reverse_bowden():
+                return False
+        return True
 
-        # select tool
-        self.select_tool(tool)
+    def before_change(self):
+        self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
+        self.exchange_old_position = self.toolhead.get_position()
+
+        x_offset = abs(self.exchange_old_position[0] - self.wipe_tower_x)
+        if x_offset < 10:
+            self.ooze_move_x = self.wipe_tower_x + self.wipe_tower_width
+        else:
+            self.ooze_move_x = self.exchange_old_position[0] - self.wipe_tower_width
+
+        self.gcode.run_script_from_command('M204 S' + str(self.wipe_tower_acceleration))
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E-2 F' + str(self.exchange_travel_speed * 60))
+        self.gcode.run_script_from_command('M400')
+        
+    def after_change(self):
+        self.respond("after_change_rome")
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Select Filament
+    # -----------------------------------------------------------------------------------------------------------------------------
+    Selected_Filament = -1
+
+    def select_filament(self, tool=-1):
+
+        # unselect filament
+        if not self.unselect_filament():
+            return False
+
+        # select filament
+        if tool == 0 or tool == -1:
+            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=extruder')
+        if tool == 1 or tool == -1:
+            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_2 MOTION_QUEUE=extruder')
+        self.Selected_Filament = tool
+
+        # success
+        return True
+
+    def unselect_filament(self):
+
+        # unselect filament
+        self.Selected_Filament = -1
+        self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=')
+        self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_2 MOTION_QUEUE=')
+
+        # success
+        return True
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Load Filament
+    # -----------------------------------------------------------------------------------------------------------------------------
+    def load_filament_from_reverse_bowden_to_toolhead_sensor(self, tool, exact_positioning=True):
+
+        # select filament
+        self.select_filament(tool)
 
         # initial move
         self.gcode.run_script_from_command('G92 E0')
@@ -368,9 +373,9 @@ class ROME:
         # success
         return True
 
-    def load_from_filament_sensor_to_parking_position(self):
+    def load_filament_from_toolhead_sensor_to_parking_position(self):
         
-        # move filament to extruder gears
+        # move filament to parking position
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_extruder_gear_mm + self.extruder_gear_to_parking_position_mm) + ' F' + str(self.filament_parking_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
@@ -378,7 +383,7 @@ class ROME:
         # success
         return True
 
-    def load_from_parking_position_to_nozzle(self):
+    def load_filament_from_parking_position_to_nozzle(self):
 
         # load filament into nozzle
         self.gcode.run_script_from_command('G92 E0')
@@ -394,6 +399,63 @@ class ROME:
         # success
         return True
 
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Unload Filament
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+    def unload_filament_from_nozzle_to_parking_position(self):
+
+        # unload filament to parking position
+        if self.origin != "rome": 
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
+        else:
+            self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
+            self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' F600')
+            self.gcode.run_script_from_command('G4 P1000')
+
+        # success
+        return True
+
+    def unload_filament_from_parking_position_to_reverse_bowden(self):
+
+        # unload filament to reverse bowden
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('M400')
+        if self.exchange_old_position == None:
+            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+        else:
+            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('M400')
+
+        # check if filament is ejected
+        if self.filament_sensor_triggered():
+            return False
+
+        # success
+        return True
+
+    def unload_filament_from_toolhead_sensor_to_reverse_bowden(self, tool, offset):
+        
+        # select filament
+        self.select_filament(tool)
+
+        # eject filament
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_reverse_bowden_parking_position_mm + offset) + ' F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('M400')
+
+        # check if filament is ejected
+        if self.filament_sensor_triggered():
+            return False
+
+        # success
+        return True
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Filament Positioning
+    # -----------------------------------------------------------------------------------------------------------------------------
     def filament_positioning(self):
 
         # fast positioning
@@ -454,93 +516,11 @@ class ROME:
         return True
 
     # -----------------------------------------------------------------------------------------------------------------------------
-    # Unload Filament
-    # -----------------------------------------------------------------------------------------------------------------------------
-    def rome_unload_tool(self, tool, temp=-1):
-    
-        # check selected temperature
-        if temp > 0:
-            if temp < self.heater.min_temp:
-                self.respond("Selected temperature " + str(temp) + " too low, must be above " + str(self.heater.min_temp))
-                return False
-            if temp > self.heater.max_temp:
-                self.respond("Selected temperature " + str(temp) + "too high, must be below " + str(self.heater.max_temp))
-                return False
-            if temp < self.heater.min_extrude_temp:
-                self.respond("Selected temperature " + str(temp) + " below minimum extrusion temperature " + str(self.heater.min_extrude_temp))
-                return False
-            # start heating
-            self.respond("Heat up nozzle to " + str(temp))
-            self.extruder_set_temperature(temp, False)
-
-        # set temp if configured and wait for it
-        if temp > 0:
-            self.respond("Waiting for heater...")
-            self.extruder_set_temperature(temp, True)
-
-        # check hotend temperature
-        if not self.extruder_can_extrude():
-            self.respond("Hotend too cold!")
-            self.respond("Heat up nozzle to " + str(self.heater.min_extrude_temp))
-            self.extruder_set_temperature(self.heater.min_extrude_temp, True)
-
-        # unload filament
-        self.select_tool(tool)
-
-        self.unload_from_nozzle_to_parking_position()
-        if not self.unload_from_parking_position_to_reverse_bowden():
-            return False
-
-        # success
-        return True
-
-    def unload_tool(self):
-        if self.filament_sensor_triggered():
-            self.select_tool(self.Selected_Tool)
-            self.unload_from_nozzle_to_parking_position()
-            if not self.unload_from_parking_position_to_reverse_bowden():
-                return False
-        return True
-
-    def unload_from_nozzle_to_parking_position(self):
-        if self.origin != "rome": 
-            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
-        else:
-            self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
-            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
-            self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' F600')
-            self.gcode.run_script_from_command('G4 P1000')
-
-    def unload_from_parking_position_to_reverse_bowden(self, tool=-1):
-
-        # select tool
-        if tool >= 0:
-            self.select_tool(tool)
-
-        # eject filament
-        self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('M400')
-        if self.exchange_old_position == None:
-            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
-        else:
-            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
-            self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
-        self.gcode.run_script_from_command('M400')
-
-        # check if filament is ejected
-        if self.filament_sensor_triggered():
-            return False
-
-        # success
-        return True
-
-    # -----------------------------------------------------------------------------------------------------------------------------
     # ROME State 
     # -----------------------------------------------------------------------------------------------------------------------------
     Paused = False
 
     def pause_rome(self):
-
         self.Paused = True
         self.enable_heater_timeout()
         self.gcode.run_script_from_command('_ROME_PAUSE')
@@ -560,6 +540,26 @@ class ROME:
     # -----------------------------------------------------------------------------------------------------------------------------
     # Helper
     # -----------------------------------------------------------------------------------------------------------------------------
+    def set_hotend_temperature(self, temp):
+        
+        # set hotend temperature
+        if temp < self.heater.min_temp:
+            self.respond("Selected temperature " + str(temp) + " too low, must be above " + str(self.heater.min_temp))
+            return False
+        if temp > self.heater.max_temp:
+            self.respond("Selected temperature " + str(temp) + "too high, must be below " + str(self.heater.max_temp))
+            return False
+        if temp < self.heater.min_extrude_temp:
+            self.respond("Selected temperature " + str(temp) + " below minimum extrusion temperature " + str(self.heater.min_extrude_temp))
+            return False
+
+        # start heating
+        self.respond("Heat up nozzle to " + str(temp))
+        self.extruder_set_temperature(temp, False)
+
+        # success
+        return True
+
     def respond(self, message):
         self.gcode.respond_raw(message)
 
