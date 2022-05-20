@@ -121,7 +121,7 @@ class ROME:
     def cmd_ROME_START_PRINT(self, param):
         self.cmd_origin = "rome"
         self.mode = "native"
-        self.Tool_Swaps = 0
+        self.Filament_Changes = 0
         self.exchange_old_position = None
 
         self.wipe_tower_x = param.get_float('WIPE_TOWER_X', None, minval=0, maxval=999) 
@@ -161,7 +161,6 @@ class ROME:
         self.respond("Homing Rome!")
         self.Homed = False
         self.Paused = False
-        self.Tool_Swaps = 0
 
         # precheck
         if not self.can_home():
@@ -228,7 +227,7 @@ class ROME:
     mode = "native"
     cmd_origin = "rome"
 
-    Tool_Swaps = 0
+    Filament_Changes = 0
     ooze_move_x = 0
     exchange_old_position = None
 
@@ -239,12 +238,12 @@ class ROME:
 
     def change_tool(self, tool):
         self.cmd_origin = "rome"
-        if self.Tool_Swaps > 0:
+        if self.Filament_Changes > 0:
             self.before_change()
             if not self.load_tool(tool, -1):
                 return False
             self.after_change()
-        self.Tool_Swaps = self.Tool_Swaps + 1
+        self.Filament_Changes = self.Filament_Changes + 1
         return True
 
     def load_tool(self, tool, temp=-1):
@@ -283,7 +282,7 @@ class ROME:
         if not self.load_filament_from_toolhead_sensor_to_parking_position():
             self.respond("could not park filament!")
             return False
-        if self.mode != "slicer" or self.Tool_Swaps == 0:
+        if self.mode != "slicer" or self.Filament_Changes == 0:
             if not self.load_filament_from_parking_position_to_nozzle():
                 self.respond("could not load into nozzle!")
                 return False
