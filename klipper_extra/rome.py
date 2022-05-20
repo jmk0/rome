@@ -25,18 +25,17 @@ class ROME:
         self.tool_count = 2
 
         self.heater_timeout = self.config.getfloat('heater_timeout', 600.0)
-        self.unload_after_print = self.config.getfloat('unload_after_print', 1)
+        self.unload_filament_after_print = self.config.getfloat('unload_filament_after_print', 1)
+        self.wipe_tower_acceleration = self.config.getfloat('wipe_tower_acceleration', 5000.0)
 
         self.nozzle_loading_speed_mms = self.config.getfloat('nozzle_loading_speed_mms', 10.0)
         self.filament_homing_speed_mms = self.config.getfloat('filament_homing_speed_mms', 75.0)
         self.filament_parking_speed_mms = self.config.getfloat('filament_parking_speed_mms', 50.0)
 
-        self.sensor_to_reverse_bowden_parking_position_mm = self.config.getfloat('sensor_to_reverse_bowden_parking_position_mm', 100.0)
-        self.sensor_to_extruder_gear_mm = self.config.getfloat('sensor_to_extruder_gear_mm', 45.0)
+        self.toolhead_sensor_to_reverse_bowden_mm = self.config.getfloat('toolhead_sensor_to_reverse_bowden_mm', 100.0)
+        self.toolhead_sensor_to_extruder_gear_mm = self.config.getfloat('toolhead_sensor_to_extruder_gear_mm', 45.0)
         self.extruder_gear_to_parking_position_mm = self.config.getfloat('extruder_gear_to_parking_position_mm', 40.0)
         self.parking_position_to_nozzle_mm = self.config.getfloat('parking_position_to_nozzle_mm', 65.0)
-
-        self.wipe_tower_acceleration = self.config.getfloat('wipe_tower_acceleration', 65.0)
 
     def register_handle_connect(self):
         self.printer.register_event_handler("klippy:connect", self.execute_handle_connect)
@@ -113,7 +112,7 @@ class ROME:
 
     def cmd_ROME_END_PRINT(self, param):
         self.gcode.run_script_from_command("_ROME_END_PRINT")
-        if self.unload_after_print == 1:
+        if self.unload_filament_after_print == 1:
             self.unload_tool()
         self.Homed = False
 
@@ -344,7 +343,7 @@ class ROME:
 
         # initial move
         self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_reverse_bowden_parking_position_mm - 20) + ' F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('G0 E' + str(self.toolhead_sensor_to_reverse_bowden_mm - 20) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
         # try to find the sensor
@@ -378,7 +377,7 @@ class ROME:
         
         # move filament to parking position
         self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E' + str(self.sensor_to_extruder_gear_mm + self.extruder_gear_to_parking_position_mm) + ' F' + str(self.filament_parking_speed_mms * 60))
+        self.gcode.run_script_from_command('G0 E' + str(self.toolhead_sensor_to_extruder_gear_mm + self.extruder_gear_to_parking_position_mm) + ' F' + str(self.filament_parking_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
         # success
@@ -424,10 +423,10 @@ class ROME:
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('M400')
         if self.exchange_old_position == None:
-            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.toolhead_sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
-            self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('G0 E-' + str(self.toolhead_sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
         # success
@@ -440,7 +439,7 @@ class ROME:
 
         # eject filament
         self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_reverse_bowden_parking_position_mm + offset) + ' F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('G0 E-' + str(self.toolhead_sensor_to_reverse_bowden_mm + offset) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
         # check if filament is ejected
