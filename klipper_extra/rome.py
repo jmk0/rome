@@ -101,7 +101,6 @@ class ROME:
         self.Selected_Filament = tool
         self.unload_tool()
 
-
     def cmd_HOME_ROME(self, param):
         self.Homed = False
         if not self.home():
@@ -280,7 +279,9 @@ class ROME:
             self.select_filament(self.Selected_Filament)
             if not self.unload_filament_from_nozzle_to_parking_position():
                 return False
-            if not self.unload_filament_from_parking_position_to_reverse_bowden():
+            if not self.unload_filament_from_parking_position_to_toolhead_sensor():
+                return False
+            if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden():
                 return False
         return True
 
@@ -417,21 +418,17 @@ class ROME:
         # success
         return True
 
-    def unload_filament_from_parking_position_to_reverse_bowden(self):
-
-        # unload filament to reverse bowden
+    def unload_filament_from_parking_position_to_toolhead_sensor(self):
+        
+        # unload filament to toolhead sensor
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('M400')
         if self.exchange_old_position == None:
-            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
-            self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm + self.sensor_to_reverse_bowden_parking_position_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('G0 E-' + str(self.sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
-
-        # check if filament is ejected
-        if self.filament_sensor_triggered():
-            return False
 
         # success
         return True
