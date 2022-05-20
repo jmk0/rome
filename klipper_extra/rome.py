@@ -5,8 +5,6 @@ from re import T
 
 class ROME:
 
-    origin = "rome"
-
     # -----------------------------------------------------------------------------------------------------------------------------
     # Initialize
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +79,7 @@ class ROME:
         self.gcode.register_command('ROME_START_PRINT', self.cmd_ROME_START_PRINT, desc=("ROME_START_PRINT"))
 
     def cmd_LOAD_TOOL(self, param):
-        self.origin = "gcode"
+        self.cmd_origin = "gcode"
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         if not self.load_tool(tool, temp):
@@ -89,7 +87,7 @@ class ROME:
             return
 
     def cmd_UNLOAD_TOOL(self, param):
-        self.origin = "gcode"
+        self.cmd_origin = "gcode"
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
 
@@ -99,7 +97,8 @@ class ROME:
 
         # unload tool
         self.Selected_Filament = tool
-        self.unload_tool()
+        if self.filament_sensor_triggered():
+            self.unload_tool()
 
     def cmd_HOME_ROME(self, param):
         self.Homed = False
@@ -112,12 +111,16 @@ class ROME:
             self.pause_rome()
 
     def cmd_ROME_END_PRINT(self, param):
+        self.cmd_origin = "gcode"
         self.gcode.run_script_from_command("_ROME_END_PRINT")
         if self.unload_filament_after_print == 1:
-            self.unload_tool()
+            if self.filament_sensor_triggered():
+                self.unload_tool()
         self.Homed = False
 
     def cmd_ROME_START_PRINT(self, param):
+        self.cmd_origin = "rome"
+        self.mode = "native"
         self.Tool_Swaps = 0
         self.exchange_old_position = None
 
@@ -126,10 +129,20 @@ class ROME:
         self.wipe_tower_width = param.get_float('WIPE_TOWER_WIDTH', None, minval=0, maxval=999)
         self.wipe_tower_rotation_angle = param.get_float('WIPE_TOWER_ROTATION_ANGLE', None, minval=-360, maxval=360)
 
-        TOOL = param.get_int('TOOL', None, minval=0, maxval=4)
-        BED_TEMP = param.get_int('BED_TEMP', None, minval=-1, maxval=self.heater.max_temp)
-        EXTRUDER_TEMP = param.get_int('EXTRUDER_TEMP', None, minval=-1, maxval=self.heater.max_temp)
-        self.gcode.run_script_from_command("_ROME_START_PRINT TOOL=" + str(TOOL) + " BED_TEMP=" + str(BED_TEMP) + " EXTRUDER_TEMP=" + str(EXTRUDER_TEMP))
+        cooling_tube_retraction = param.get_float('COOLING_TUBE_RETRACTION', None, minval=0, maxval=999) 
+        cooling_tube_length = param.get_float('COOLING_TUBE_LENGTH', None, minval=0, maxval=999) 
+        parking_pos_retraction = param.get_float('PARKING_POS_RETRACTION', None, minval=0, maxval=999) 
+        extra_loading_move = param.get_float('EXTRA_LOADING_MOVE', None, minval=-999, maxval=999) 
+        if cooling_tube_retraction == 0 and cooling_tube_length == 0 and parking_pos_retraction == 0 and extra_loading_move == 0:
+            self.mode = "native"
+        else:
+            self.mode = "slicer"
+        
+        tool = param.get_int('TOOL', None, minval=0, maxval=4)
+        bed_temp = param.get_int('BED_TEMP', None, minval=-1, maxval=self.heater.max_temp)
+        extruder_temp = param.get_int('EXTRUDER_TEMP', None, minval=-1, maxval=self.heater.max_temp)
+
+        self.gcode.run_script_from_command("_ROME_START_PRINT TOOL=" + str(tool) + " BED_TEMP=" + str(bed_temp) + " EXTRUDER_TEMP=" + str(extruder_temp))
 
     def cmd_PAUSE_ROME(self, param):
         self.pause_rome()
@@ -177,9 +190,10 @@ class ROME:
         if self.filament_sensor_triggered():
 
             # unload filament from nozzle
-            if not self.unload_tool():
-                self.respond("Can not unload from nozzle!")
-                return False
+            if self.filament_sensor_triggered():
+                if not self.unload_tool():
+                    self.respond("Can not unload from nozzle!")
+                    return False
 
             # turn off hotend heater
             self.extruder_set_temperature(0, False)
@@ -211,6 +225,9 @@ class ROME:
     # -----------------------------------------------------------------------------------------------------------------------------
     # Change Tool
     # -----------------------------------------------------------------------------------------------------------------------------
+    mode = "native"
+    cmd_origin = "rome"
+
     Tool_Swaps = 0
     ooze_move_x = 0
     exchange_old_position = None
@@ -221,7 +238,7 @@ class ROME:
     wipe_tower_rotation_angle = 0
 
     def change_tool(self, tool):
-        self.origin = "rome"
+        self.cmd_origin = "rome"
         if self.Tool_Swaps > 0:
             self.before_change()
             if not self.load_tool(tool, -1):
@@ -253,9 +270,10 @@ class ROME:
             self.extruder_set_temperature(self.heater.min_extrude_temp, True)
 
         # load filament
-        if not self.unload_tool():
-            self.respond("could not unload tool!")
-            return False
+        if self.filament_sensor_triggered():
+            if not self.unload_tool():
+                self.respond("could not unload tool!")
+                return False
         if not self.select_filament(tool):
             self.respond("could not select filament!")
             return False
@@ -265,25 +283,48 @@ class ROME:
         if not self.load_filament_from_toolhead_sensor_to_parking_position():
             self.respond("could not park filament!")
             return False
-        if not self.load_filament_from_parking_position_to_nozzle():
-            self.respond("could not load into nozzle!")
-            return False
+        if self.mode != "slicer" or self.Tool_Swaps == 0:
+            if not self.load_filament_from_parking_position_to_nozzle():
+                self.respond("could not load into nozzle!")
+                return False
 
         # success
         return True
 
     def unload_tool(self):
-        if self.filament_sensor_triggered():
-            self.select_filament(self.Selected_Filament)
+
+        # select tool
+        self.select_filament(self.Selected_Filament)
+
+        # unload tool
+        if self.mode != "slicer":
             if not self.unload_filament_from_nozzle_to_parking_position():
                 return False
-            if not self.unload_filament_from_parking_position_to_toolhead_sensor():
-                return False
-            if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden():
-                return False
+        if not self.unload_filament_from_parking_position_to_toolhead_sensor():
+            return False
+        if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden():
+            return False
+
+        # success
         return True
 
     def before_change(self):
+        if self.mode == "native":
+            self.before_change_rome_native()
+        elif self.mode == "slicer":
+            self.before_change_rome_slicer()
+        
+    def after_change(self):
+        if self.mode == "native":
+            self.after_change_rome_native()
+        elif self.mode == "slicer":
+            self.after_change_rome_slicer()
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Rome Native
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+    def before_change_rome_native(self):
         self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
         self.exchange_old_position = self.toolhead.get_position()
 
@@ -298,8 +339,21 @@ class ROME:
         self.gcode.run_script_from_command('G0 E-2 F3600')
         self.gcode.run_script_from_command('M400')
         
-    def after_change(self):
-        self.respond("after_change_rome")
+    def after_change_rome_native(self):
+        self.respond("after_change_rome_native")
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Rome Slicer
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+    def before_change_rome_slicer(self):
+        self.respond("before_change_rome_slicer")
+        self.gcode.run_script_from_command('SAVE_GCODE_STATE NAME=PAUSE_state')
+        self.exchange_old_position = self.toolhead.get_position()
+        self.gcode.run_script_from_command('M204 S' + str(self.wipe_tower_acceleration))
+        
+    def after_change_rome_slicer(self):
+        self.respond("after_change_rome_slicer")
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Select Filament
@@ -383,7 +437,7 @@ class ROME:
 
         # load filament into nozzle
         self.gcode.run_script_from_command('G92 E0')
-        if self.origin != "rome" or self.exchange_old_position == None or self.use_ooze_ex == 0:
+        if self.cmd_origin != "rome" or self.exchange_old_position == None or self.use_ooze_ex == 0:
             self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
@@ -402,7 +456,7 @@ class ROME:
     def unload_filament_from_nozzle_to_parking_position(self):
 
         # unload filament to parking position
-        if self.origin != "rome" or self.use_ooze_ex == 0: 
+        if self.cmd_origin != "rome" or self.use_ooze_ex == 0: 
             self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
         else:
             self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
@@ -418,7 +472,7 @@ class ROME:
         # unload filament to toolhead sensor
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('M400')
-        if self.exchange_old_position == None or self.use_ooze_ex == 0:
+        if self.cmd_origin != "rome" or self.exchange_old_position == None or self.use_ooze_ex == 0:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.toolhead_sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
@@ -560,5 +614,8 @@ class ROME:
         result = status['can_extrude'] 
         return result
 
+# -----------------------------------------------------------------------------------------------------------------------------
+# Entry Point
+# -----------------------------------------------------------------------------------------------------------------------------
 def load_config(config):
     return ROME(config)
