@@ -27,6 +27,7 @@ class ROME:
         self.heater_timeout = self.config.getfloat('heater_timeout', 600.0)
         self.unload_filament_after_print = self.config.getfloat('unload_filament_after_print', 1)
         self.wipe_tower_acceleration = self.config.getfloat('wipe_tower_acceleration', 5000.0)
+        self.use_ooze_ex = self.config.getfloat('use_ooze_ex', 1)
 
         self.nozzle_loading_speed_mms = self.config.getfloat('nozzle_loading_speed_mms', 10.0)
         self.filament_homing_speed_mms = self.config.getfloat('filament_homing_speed_mms', 75.0)
@@ -193,11 +194,14 @@ class ROME:
 
     def home_filament(self, filament):
  
+        # select filament
+        self.select_filament(filament)
+
         # home filament
-        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(filament, False):
+        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(False):
             self.respond("Filament " + str(filament) + " cant be loaded into the toolhead sensor!")
             return False
-        if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden(filament, 30):
+        if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden(20):
             self.respond("Filament " + str(filament) + " cant be unloaded from the toolhead sensor!")
             return False
 
@@ -208,13 +212,8 @@ class ROME:
     # Change Tool
     # -----------------------------------------------------------------------------------------------------------------------------
     Tool_Swaps = 0
-
     ooze_move_x = 0
-
-    exchange_lift_speed = 60
-    exchange_travel_speed = 750
     exchange_old_position = None
-    exchange_safe_z = 0
 
     wipe_tower_x = 170
     wipe_tower_y = 140
@@ -260,7 +259,7 @@ class ROME:
         if not self.select_filament(tool):
             self.respond("could not select filament!")
             return False
-        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(tool):
+        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor():
             self.respond("could not load tool to sensor!")
             return False
         if not self.load_filament_from_toolhead_sensor_to_parking_position():
@@ -296,7 +295,7 @@ class ROME:
 
         self.gcode.run_script_from_command('M204 S' + str(self.wipe_tower_acceleration))
         self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-2 F' + str(self.exchange_travel_speed * 60))
+        self.gcode.run_script_from_command('G0 E-2 F3600')
         self.gcode.run_script_from_command('M400')
         
     def after_change(self):
@@ -336,10 +335,7 @@ class ROME:
     # -----------------------------------------------------------------------------------------------------------------------------
     # Load Filament
     # -----------------------------------------------------------------------------------------------------------------------------
-    def load_filament_from_reverse_bowden_to_toolhead_sensor(self, tool, exact_positioning=True):
-
-        # select filament
-        self.select_filament(tool)
+    def load_filament_from_reverse_bowden_to_toolhead_sensor(self, exact_positioning=True):
 
         # initial move
         self.gcode.run_script_from_command('G92 E0')
@@ -387,7 +383,7 @@ class ROME:
 
         # load filament into nozzle
         self.gcode.run_script_from_command('G92 E0')
-        if self.origin != "rome" or self.exchange_old_position == None:
+        if self.origin != "rome" or self.exchange_old_position == None or self.use_ooze_ex == 0:
             self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm) + ' F' + str(self.nozzle_loading_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E' + str(self.parking_position_to_nozzle_mm / 2) + ' X' + str(self.ooze_move_x) + ' F' + str(self.nozzle_loading_speed_mms * 60))
@@ -406,7 +402,7 @@ class ROME:
     def unload_filament_from_nozzle_to_parking_position(self):
 
         # unload filament to parking position
-        if self.origin != "rome": 
+        if self.origin != "rome" or self.use_ooze_ex == 0: 
             self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
         else:
             self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
@@ -422,7 +418,7 @@ class ROME:
         # unload filament to toolhead sensor
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('M400')
-        if self.exchange_old_position == None:
+        if self.exchange_old_position == None or self.use_ooze_ex == 0:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm + self.toolhead_sensor_to_extruder_gear_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
         else:
             self.gcode.run_script_from_command('G0 E-' + str(self.extruder_gear_to_parking_position_mm) + ' X' + str(self.exchange_old_position[0]) + ' F' + str(self.filament_homing_speed_mms * 60))
@@ -432,11 +428,8 @@ class ROME:
         # success
         return True
 
-    def unload_filament_from_toolhead_sensor_to_reverse_bowden(self, tool, offset):
+    def unload_filament_from_toolhead_sensor_to_reverse_bowden(self, offset=0):
         
-        # select filament
-        self.select_filament(tool)
-
         # eject filament
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('G0 E-' + str(self.toolhead_sensor_to_reverse_bowden_mm + offset) + ' F' + str(self.filament_homing_speed_mms * 60))
@@ -512,7 +505,7 @@ class ROME:
         return True
 
     # -----------------------------------------------------------------------------------------------------------------------------
-    # ROME State 
+    # Pause
     # -----------------------------------------------------------------------------------------------------------------------------
     Paused = False
 
@@ -525,11 +518,8 @@ class ROME:
         self.Paused = False
         self.disable_heater_timeout()
         if self.exchange_old_position != None:
-            resume_z = self.exchange_safe_z
-            if resume_z < self.exchange_old_position[2] + 2:
-                resume_z = self.exchange_old_position[2] + 2
-            self.gcode.run_script_from_command('G0 Z' + str(resume_z) + ' F' + str(self.exchange_lift_speed * 60))
-            self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' Y' + str(self.exchange_old_position[1]) + ' F' + str(self.exchange_travel_speed * 60))
+            self.gcode.run_script_from_command('G0 Z' + str(self.exchange_old_position[2] + 2) + ' F3600')
+            self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' Y' + str(self.exchange_old_position[1]) + ' F3600')
             self.gcode.run_script_from_command('M400')
         self.gcode.run_script_from_command("_ROME_RESUME")
 
