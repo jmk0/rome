@@ -13,10 +13,10 @@ A simple but highly reliable filament sensor
 - 5 mm x 2 mm N45 permanent round magnet
 - 2 x M2 screws 
 - 2 x M2 nuts
-- 2 x ptfe tube fittings
+- 2 x PTFE tube fittings
 
 ## IMPORTANT
-- chamfer all PTFE Tubes on the side where the filament enters, DO NOT chamfer them where the filament comes out  
-- Even if it doesnt look like form the outside, the sensor has a top and a bottom side, the side touching the build plate is the bottom side, thats the side that points to the extruder.  
+- chamfer all PTFE Tubes on the filament entry side, DO NOT chamfer them on the filament exit side
+- Although externally not visible, the sensor has a top and a bottom side. The side touching the build plate is the bottom side, thats the side that points to the extruder.
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/sensor.jpg" alt="" width="800"/>
