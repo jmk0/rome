@@ -5,6 +5,7 @@ A multi extruder to direct extruder solution for RatOS
 (Currently limited to 2 Extruders)
 
 ## Table of Content
+- [Intro](#intro)
 - [Installation](#installation)
     - [Raspberry](#raspberry)
     - [Moonraker](#moonraker)
@@ -13,7 +14,14 @@ A multi extruder to direct extruder solution for RatOS
     - [G-code](#G-code)
     - [Native](#native)
 - [Hardware](#hardware)
- 
+
+
+# Intro
+
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_toolhead.jpg" alt="" width="800"/>
+
+
 # Installation
 
 ## Raspberry
