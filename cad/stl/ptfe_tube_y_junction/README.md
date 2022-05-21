@@ -1,9 +1,9 @@
 # PTFE Tube Y-Junction
 
-A simple but highly reliable filament sensor
+A simple and nearly frictionless PTFE Tube Y-Junction
 
 ## Printing
-- the part is already oriented to print it  
+- the parts are already oriented correctly  
 - print with 0.1mm layer height
 
 ## BOM
@@ -12,4 +12,4 @@ A simple but highly reliable filament sensor
 
 ## IMPORTANT
 - use the provided jigs to cut the PTFE tubes to its correct size and shape
-- chamfer the PTFE tubes on the correct sides before inserting them
+- chamfer all PTFE Tubes on the side where the filament enters, DO NOT chamfer them where the filament comes out

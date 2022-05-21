@@ -3,7 +3,7 @@
 A simple but highly reliable filament sensor
 
 ## Printing
-- the part is already oriented to print it  
+- the part is already oriented correctly
 - print with 0.1mm layer height
 - put the magnet via print in place in its pocket
 
@@ -16,6 +16,7 @@ A simple but highly reliable filament sensor
 - 2 x ptfe tube fittings
 
 ## IMPORTANT
-Even if it doesnt look like form the outside, the sensor has a top and a bottom side, the side touching the build plate is the bottom side, thats the side that points to the extruder.  
+- chamfer all PTFE Tubes on the side where the filament enters, DO NOT chamfer them where the filament comes out  
+- Even if it doesnt look like form the outside, the sensor has a top and a bottom side, the side touching the build plate is the bottom side, thats the side that points to the extruder.  
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/sensor.jpg" alt="" width="800"/>
