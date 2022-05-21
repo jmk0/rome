@@ -24,9 +24,11 @@ Im having a MMU and like it, but i realized that 99% of my multimaterial prints 
 
 I had two spare extruders in my drawer and thought this could be an interesting project.
 
-ROME is MUCH faster then a regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles this process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination.
+In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
 
-Every multimaterial loading and unloading setting in the slicer will be deactivated and replaced with a macro.
+ROME is also MUCH faster then any regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles this process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
+
+Every multimaterial loading and unloading setting in the slicer will be deactivated and replaced with a simlpe macro. By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fit your needs.
 
 ```ini
 # -------------------------------------										
@@ -47,10 +49,6 @@ gcode:
   G4 P500
   M400
 ```
-
-In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
-
-Oh, and it looks cool
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_toolhead.jpg" alt="" width="800"/>
