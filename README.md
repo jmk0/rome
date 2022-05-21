@@ -143,11 +143,12 @@ Print Settings->multiple extruders->Wipe tower
 
 ## Primary Extruder
 
-Rome is by default configured to use it with Orbiter Extruders. In case you want to use other extruders you can override these sections in your printer.cfg
+Rome is by default configured to use it with Orbiter Extruders on a Octopus mainboard. In case you want to use other extruders or mainboard you can override these sections in your printer.cfg
 
 ```ini
 # -------------------------------------										
 # Toolhead Extruder 
+# Orbiter 2.0 
 # -------------------------------------	
 [extruder]
 max_extrude_only_velocity: 100
@@ -161,6 +162,7 @@ max_extrude_cross_section: 999999
 ```ini
 # -------------------------------------										
 # Rome Extruder 1
+# Orbiter 1.5 on Octopus Board Driver 3
 # -------------------------------------										
 [extruder_stepper rome_extruder_1]
 extruder:
@@ -182,6 +184,7 @@ driver_HSTRT: 7
 
 # -------------------------------------										
 # Rome Extruder 2
+# Orbiter 1.5 on Octopus Board Driver 4
 # -------------------------------------										
 [extruder_stepper rome_extruder_2]
 extruder:
