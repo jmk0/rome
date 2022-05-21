@@ -47,15 +47,15 @@ The Rome Native Mode handles the filament loading and unloading on the Wipe towe
 
 **Activate additional extruders**
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_capabilities.jpg" alt="" width="387"/>
 Printer Settings->General->Capabilities
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_capabilities.jpg" alt="" width="387"/>
 
 **Dectivate all multi material parameters**
 
 Make sure to enter 0 in all of these fields.
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_mmu_parameters.jpg" alt="" width="407"/>
 Printer Settings->General->Single extruder multi material parameters
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_mmu_parameters.jpg" alt="" width="407"/>
 
 
 ## Classic
