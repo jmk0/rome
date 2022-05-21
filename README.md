@@ -95,16 +95,11 @@ Filament Settings->Multimaterial->Multimaterial toolchange string reduction
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_dip.jpg" alt="" width="454"/>
 
 
-**Dectivate cooling moves**
+**Dectivate cooling moves and ramming**
 
 Filament Settings->Multimaterial->Multimaterial parameters with single extruder MM printers
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_toolchange_parameters.jpg" alt="" width="400"/>
-
-
-**Dectivate ramming**
-
-Filament Settings->Multimaterial->Multimaterial parameters with single extruder MM printers->ramming parameters
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_ramming.jpg" alt="" width="764"/>
 
