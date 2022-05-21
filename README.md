@@ -45,11 +45,16 @@ Rome can operate in two different modes.
 
 The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Less Slicer configuration needed and more control over the process.
 
-Activate additional extruders
+**Activate additional extruders**
 
 Printer Settings->General->Capabilities
-
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_capabilities.jpg" alt="" width="387"/>
+
+**Dectivate all multi material parameters**
+Make sure to enter 0 in all of these fields.
+Printer Settings->General->Single extruder multi material parameters
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_mmu_parameters.jpg" alt="" width="407"/>
+
 
 ## Classic
 
