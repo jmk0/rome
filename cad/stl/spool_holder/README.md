@@ -3,6 +3,8 @@
 A simple double spool holder with mounting plates for different extruders
 (work in progress)
 
+This is a modified version of the official RatRig spool holder.
+
 ## Printing
 - the parts are already oriented correctly
 - print with 0.2mm - 0.3mm layer height
