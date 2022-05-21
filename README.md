@@ -26,11 +26,11 @@ I had two spare extruders in my drawer and thought this could be an interesting 
 
 In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
 
-ROME is also MUCH faster then any regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles this process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
+ROME is MUCH faster then any regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles this process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
+
+You can even set the acceleration for the wipe tower, in combination with the slicer **max speed for the wipe tower** feature, you can speed up the process even more.
 
 With its **Ooze Ex** feature, it lets you use the most oozing hotends on the markets, it still produces a clean wipe tower
-
-You can also set the acceleration for the wipe tower, in combination with the **max speed for the wipe tower** feature from the slicer, you can speed up the process even more.
 
 Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simple [unload macro](#unload). 
 
