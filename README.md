@@ -40,8 +40,6 @@ origin: https://github.com/HelgeKeck/rome.git
 
 # Slicer 
 
-Rome can operate in two different modes.
-
 ## G-code 
 
 Printer Start G-code
@@ -66,10 +64,15 @@ SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_1
 SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_2
 ```
 
+## Rome Modes 
+
+Rome can operate in two different modes, Native and Classic.
+
+The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
+
+The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer proeprly.
+
 ## Native 
-
-The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Less Slicer configuration needed and more control over the process.
-
 
 **Use relative E distances**
 
@@ -137,8 +140,6 @@ Print Settings->multiple extruders->Wipe tower
 
 
 ## Classic
-
-The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer proeprly.
 
 ```ini
 # ROME
