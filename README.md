@@ -45,7 +45,7 @@ Rome can operate in two different modes.
 
 The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Less Slicer configuration needed and more control over the process.
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/capabilities.jpg" alt="" width="1275"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/capabilities.jpg" alt="" width="387"/>
 
 ## Classic
 
