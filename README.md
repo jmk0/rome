@@ -85,6 +85,9 @@ CHANGE_TOOL TOOL=[next_extruder]
 ```
 
 Filament Start G-code
+
+This is just an example, it shows how to configure pressure advance for all the used extruders
+
 ```
 SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04
 SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_1
