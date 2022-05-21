@@ -35,7 +35,7 @@ You can also set the acceleration for the wipe tower, in combination with the **
 Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simple [unload macro](#unload). 
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_toolhead.jpg" alt="" width="800"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/toolhead.jpg" alt="" width="800"/>
 
 
 # Installation
