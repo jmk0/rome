@@ -2,6 +2,7 @@
 RatOS Multi Extruder
 
 A multi extruder to direct extruder solution for RatOS
+
 (Currently limited to 2 Extruders)
 
 ## Table of Content
@@ -17,6 +18,14 @@ A multi extruder to direct extruder solution for RatOS
 
 
 # Intro
+
+Im having a MMU and like it, but i realized that 99% of my multimaterial prints are just two colors, or even less :-)
+
+I had two spare extruders in my drawer and thought this could be an interesting project.
+
+This setup is much faster, the unloading and loading process is multiple times faster than with a MMU or ERCF, Rome just have to park the filament behind the y-junction.
+
+In case you have a octopus board, the additional extruders can be plugged into the free slots of a octopus board, no additional hardware needed
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_toolhead.jpg" alt="" width="800"/>
