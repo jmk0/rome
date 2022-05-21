@@ -48,26 +48,31 @@ The Rome Native Mode handles the filament loading and unloading on the Wipe towe
 **Use relative E distances**
 
 Printer Settings->General->Advanced
+
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_advanced.jpg" alt="" width="320"/>
 
 **Activate additional extruders**
 
 Printer Settings->General->Capabilities
+
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_capabilities.jpg" alt="" width="387"/>
 
 **Dectivate all multi material parameters**
 
 Printer Settings->Single extruder MM setup->Single extruder multi material parameters
+
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_mmu_parameters.jpg" alt="" width="407"/>
 
 **Dectivate advanced wiping volume**
 
 Printer Settings->Single extruder MM setup->Advanced wipe tower pure volume calculs
+
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wiping_volume.jpg" alt="" width="462"/>
 
 **Dectivate advanced wiping volume**
 
 Printer Settings->General->Advanced wipe tower pure volume calculs
+
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wiping_volume.jpg" alt="" width="462"/>
 
 ## Classic
