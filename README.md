@@ -59,7 +59,10 @@ path: ~/rome
 origin: https://github.com/HelgeKeck/rome.git
 ```
 
-## RatOS 
+## RatOS
+
+Add this to the users override section in your printer.cfg
+
 ```ini
 # ROME
 [include rome/config.cfg]
