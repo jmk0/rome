@@ -77,6 +77,8 @@ class ROME:
         self.gcode.register_command('CHANGE_TOOL', self.cmd_CHANGE_TOOL, desc=("CHANGE_TOOL"))
         self.gcode.register_command('ROME_END_PRINT', self.cmd_ROME_END_PRINT, desc=("ROME_END_PRINT"))
         self.gcode.register_command('ROME_START_PRINT', self.cmd_ROME_START_PRINT, desc=("ROME_START_PRINT"))
+        self.gcode.register_command('ROME_INSERT_GCODE', self.cmd_ROME_INSERT_GCODE, desc=("ROME_INSERT_GCODE"))
+        self.gcode.register_command('ROME_RUNOUT_GCODE', self.cmd_ROME_RUNOUT_GCODE, desc=("ROME_RUNOUT_GCODE"))
 
     def cmd_LOAD_TOOL(self, param):
         self.cmd_origin = "gcode"
@@ -149,6 +151,12 @@ class ROME:
 
     def cmd_RESUME_ROME(self, param):
         self.resume_rome()
+
+    def cmd_ROME_INSERT_GCODE(self, param):
+        self.insert_gcode()
+
+    def cmd_ROME_RUNOUT_GCODE(self, param):
+        self.runout_gcode()
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Home
@@ -556,6 +564,15 @@ class ROME:
 
         # success
         return True
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Filament Sensor
+    # -----------------------------------------------------------------------------------------------------------------------------
+    def insert_gcode(self):
+        self.respond("insert_gcode")
+
+    def runout_gcode(self):
+        self.respond("runout_gcode")
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Pause

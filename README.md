@@ -233,7 +233,7 @@ event_delay: 0.1
 pause_delay: 0.1
 switch_pin: ^!PG15
 insert_gcode:
-  M117 Filament inserted...
+  ROME_INSERT_GCODE
 runout_gcode:
-  M117 Filament runbout...
+  ROME_RUNOUT_GCODE
 ```
