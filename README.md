@@ -25,7 +25,9 @@ I had two spare extruders in my drawer and thought this could be an interesting 
 
 This setup is much faster, the unloading and loading process is multiple times faster than with a MMU or ERCF, Rome just have to park the filament behind the y-junction.
 
-In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed
+In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
+
+Oh, and it looks cool
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_toolhead.jpg" alt="" width="800"/>
