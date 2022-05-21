@@ -32,31 +32,7 @@ With its **Ooze Ex** feature, it lets you use the most oozing hotends on the mar
 
 You can also set the acceleration for the wipe tower, in combination with the **max speed for the wipe tower** feature from the slicer, you can speed up the process even more.
 
-Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simple [macro](#unload). 
-
-```ini
-# -------------------------------------										
-# Unload from nozzle to parking position
-# Rapido UHF
-# Prusament PETG @ 250°
-# -------------------------------------										
-[gcode_macro _UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION]
-gcode:
-  # initial retract
-  G92 E0
-  G0 E-25 F3600
-  G4 P500
-  # remove string
-  G92 E0
-  G0 E20 F3600
-  G4 P100
-  # move to parking position
-  G92 E0
-  G0 E-35 F3600
-  G4 P500
-  # wait for movements
-  M400
-```
+Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simple [unload macro](#unload). 
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_toolhead.jpg" alt="" width="800"/>
