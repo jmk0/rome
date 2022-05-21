@@ -30,6 +30,8 @@ ROME is also MUCH faster then any regular MMU or ERCF setup, the whole filament 
 
 With its **Ooze Ex** feature, it lets you use the most oozing hotends on the markets, it still produces a clean wipe tower
 
+You can also set the acceleration for the wipe tower, in combination with the **max speed for the wipe tower** feature from the slicer, you can speed up the process even more.
+
 Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simlpe macro. By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fit your needs.
 
 ```ini
