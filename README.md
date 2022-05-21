@@ -12,7 +12,6 @@ A multi extruder to direct extruder solution for RatOS
 - [Slicer](#slicer)
     - [G-code](#G-code)
     - [Native](#native)
-    - [Classic](#classic)
 - [Hardware](#hardware)
  
 # Installation
@@ -71,7 +70,7 @@ Rome can operate in two different modes, Native and Classic.
 
 The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
 
-The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer proeprly.
+The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer proeprly. Configure your slicer like you would do for the MMU or ERCF.
 
 ## Native 
 
@@ -140,21 +139,15 @@ Print Settings->multiple extruders->Wipe tower
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower.jpg" alt="" width="584"/>
 
 
-## Classic
-
-```ini
-# ROME
-[include rome/config.cfg]
-```
-
 # Hardware 
 
 ## Primary Extruder
 
+Rome is by default configured to use it with Orbiter Extruders. In case you want to use other extruders you can override these sections in your printer.cfg
+
 ```ini
 # -------------------------------------										
-# Extruder 
-# Orbiter 1004
+# Toolhead Extruder 
 # -------------------------------------	
 [extruder]
 max_extrude_only_velocity: 100
@@ -168,7 +161,6 @@ max_extrude_cross_section: 999999
 ```ini
 # -------------------------------------										
 # Rome Extruder 1
-# Orbiter 1004
 # -------------------------------------										
 [extruder_stepper rome_extruder_1]
 extruder:
@@ -190,7 +182,6 @@ driver_HSTRT: 7
 
 # -------------------------------------										
 # Rome Extruder 2
-# Orbiter 1004
 # -------------------------------------										
 [extruder_stepper rome_extruder_2]
 extruder:
