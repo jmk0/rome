@@ -88,6 +88,11 @@ Filament Settings->Multimaterial->Multimaterial toolchange temperature
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_toolchange_temperature.jpg" alt="" width="400"/>
 
 
+**Dectivate skinnydip string reduction**
+
+Filament Settings->Multimaterial->Multimaterial toolchange string reduction
+
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_dip.jpg" alt="" width="454"/>
 
 
 
