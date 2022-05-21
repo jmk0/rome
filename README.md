@@ -52,11 +52,13 @@ Printer Settings->General->Capabilities
 
 **Dectivate all multi material parameters**
 
-Make sure to enter 0 in all of these fields.
-
 Printer Settings->General->Single extruder multi material parameters
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_mmu_parameters.jpg" alt="" width="407"/>
 
+**Dectivate advanced wipig volume**
+
+Printer Settings->General->Single extruder multi material parameters
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wiping_volume.jpg" alt="" width="462"/>
 
 ## Classic
 
