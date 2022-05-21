@@ -12,7 +12,9 @@ A multi extruder to direct extruder solution for RatOS
 - [Slicer](#slicer)
     - [Native](#native)
     - [Classic](#classic)
- 
+
+
+
 # Installation
 
 ## Raspberry
@@ -36,6 +38,8 @@ origin: https://github.com/HelgeKeck/rome.git
 # ROME
 [include rome/config.cfg]
 ```
+
+
 
 # Slicer 
 
