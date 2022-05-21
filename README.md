@@ -24,13 +24,13 @@ High speed multi material printing, currently limited to 2 Extruders.
 
 # Intro
 
-Im having a MMU and like it, but i realized that 99% of my multimaterial prints are just two colors, or even less :-)
+I own a MMU and i like it, but i realized that 99% of my multimaterial prints are just two colors, or even less :-)
 
 I had two spare extruders in my drawer and thought this could be an interesting project.
 
 In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
 
-ROME is MUCH faster then any regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles the loading and unloading process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
+ROME is MUCH faster then any regular MMU or ERCF setup. The whole filament unloading and loading process is multiple times faster, not only because ROME just has to park the filament behind the y-junction. In its native mode, ROME handles the loading and unloading process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
 
 You can even set the acceleration for the wipe tower, in combination with the slicer **max speed for the wipe tower** feature, you can speed up the process even more.
 
@@ -101,7 +101,7 @@ SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_2
 
 ROME can operate in two different modes, Native and Classic.
 
-The Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would do for the MMU or ERCF.
+The Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would for the MMU or ERCF.
 
 The Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
 
@@ -176,7 +176,7 @@ Print Settings->multiple extruders->Wipe tower
 
 ## Primary Extruder
 
-ROME is by default configured to use it with Orbiter Extruders on a Octopus mainboard. In case you want to use other extruders or mainboard you can override these sections in your printer.cfg
+ROME is by default configured to be used with Orbiter Extruders on an Octopus mainboard. In case you want to use other extruders or mainboard you can override these sections in your printer.cfg
 
 ```ini
 # -------------------------------------										
@@ -281,7 +281,7 @@ parking_position_to_nozzle_mm: 35               # distance between the parking p
 
 # Unload
 
-By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fit your needs.
+By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fits your needs.
 
 ```ini
 # -------------------------------------										
