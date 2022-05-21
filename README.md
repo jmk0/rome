@@ -70,7 +70,7 @@ Rome can operate in two different modes, Native and Classic.
 
 The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
 
-The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer proeprly. Configure your slicer like you would do for the MMU or ERCF.
+The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would do for the MMU or ERCF.
 
 ## Native 
 
