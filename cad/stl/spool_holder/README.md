@@ -5,6 +5,7 @@ A simple double spool holder with mounting plates for different extruders
 
 ## Printing
 - the parts are already oriented correctly
+- print with 0.2mm - 0.3mm layer height
 
 ## BOM
 - 4 x M8 Hex Nut
