@@ -37,7 +37,6 @@ Every MM loading and unloading setting in the slicer will be deactivated and rep
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/toolhead.jpg" alt="" width="800"/>
 
-
 # Installation
 
 ## Raspberry
@@ -92,9 +91,9 @@ SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_2
 
 ROME can operate in two different modes, Native and Classic.
 
-The ROME Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
+The Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would do for the MMU or ERCF.
 
-The ROME Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would do for the MMU or ERCF.
+The Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
 
 ## Native 
 
