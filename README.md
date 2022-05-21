@@ -22,7 +22,6 @@ A multi extruder to direct extruder solution for RatOS
   - [Y-Junction](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_y_junction)
   - [Double Spool Holder](https://github.com/HelgeKeck/rome/tree/main/cad/stl/spool_holder)
 
-
 # Intro
 
 Im having a MMU and like it, but i realized that 99% of my multimaterial prints are just two colors, or even less :-)
