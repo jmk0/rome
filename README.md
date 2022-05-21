@@ -16,10 +16,11 @@ A multi extruder to direct extruder solution for RatOS
     - [Native](#native)
 - [Hardware](#hardware)
 - [Configuration](#configuration)
-- Printed Parts
-    - [Filament Sensor](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_inline_filament_sensor)
-    - [Y-Junction](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_y_junction)
-    - [Double Spool Holder](https://github.com/HelgeKeck/rome/tree/main/cad/stl/spool_holder)
+
+## Printed Parts
+  - [Filament Sensor](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_inline_filament_sensor)
+  - [Y-Junction](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_y_junction)
+  - [Double Spool Holder](https://github.com/HelgeKeck/rome/tree/main/cad/stl/spool_holder)
 
 
 # Intro

@@ -13,3 +13,4 @@ A simple and nearly frictionless PTFE Tube Y-Junction
 ## IMPORTANT
 - use the provided jigs to cut the PTFE tubes to its correct size and shape
 - chamfer all PTFE Tubes on the side where the filament enters, DO NOT chamfer them where the filament comes out
+- do not try to push the PTFE tubes completely into the part, let the fittings do the rest
