@@ -3,7 +3,7 @@ RatOS Multi Extruder
 
 A multi extruder to direct extruder solution for RatOS
 
-(Currently limited to 2 Extruders)
+High speed multi material printing, currently limited to 2 Extruders.
 
 ## Table of Content
 - [Intro](#intro)
