@@ -59,6 +59,13 @@ Printer Tool change G-code
 CHANGE_TOOL TOOL=[next_extruder]
 ```
 
+Filament Start G-code
+```
+SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04
+SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_1
+SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_2
+```
+
 ## Native 
 
 The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Less Slicer configuration needed and more control over the process.
