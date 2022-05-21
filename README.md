@@ -13,6 +13,7 @@ A multi extruder to direct extruder solution for RatOS
     - [G-code](#G-code)
     - [Native](#native)
     - [Classic](#classic)
+- [Hardware](#hardware)
  
 # Installation
 
@@ -145,3 +146,68 @@ Print Settings->multiple extruders->Wipe tower
 # ROME
 [include rome/config.cfg]
 ```
+
+# Hardware 
+
+## Primary Extruder
+
+```ini
+# -------------------------------------										
+# Extruder 
+# Orbiter 1004
+# -------------------------------------	
+[extruder]
+max_extrude_only_velocity: 100
+max_extrude_only_accel: 1000
+max_extrude_only_distance: 400
+max_extrude_cross_section: 999999
+```
+
+## Secondary Extruders
+
+```ini
+# -------------------------------------										
+# Rome Extruder 1
+# Orbiter 1004
+# -------------------------------------										
+[extruder_stepper rome_extruder_1]
+extruder:
+step_pin: PG4
+dir_pin: !PC1
+enable_pin: !PA0
+microsteps: 64
+rotation_distance: 4.63
+full_steps_per_rotation: 200
+
+[tmc2209 extruder_stepper rome_extruder_1]
+uart_pin: PC7
+stealthchop_threshold: 0
+interpolate: False
+driver_TBL: 1
+driver_TOFF: 3
+driver_HEND: 9
+driver_HSTRT: 7
+
+# -------------------------------------										
+# Rome Extruder 2
+# Orbiter 1004
+# -------------------------------------										
+[extruder_stepper rome_extruder_2]
+extruder:
+step_pin: PF9
+dir_pin: !PF10
+enable_pin: !PG2
+microsteps: 64
+rotation_distance: 4.63
+full_steps_per_rotation: 200
+
+[tmc2209 extruder_stepper rome_extruder_2]
+uart_pin: PF2
+stealthchop_threshold: 0
+interpolate: False
+driver_TBL: 1
+driver_TOFF: 3
+driver_HEND: 9
+driver_HSTRT: 7
+```
+
