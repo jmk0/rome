@@ -102,6 +102,12 @@ Filament Settings->Multimaterial->Multimaterial parameters with single extruder 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_toolchange_parameters.jpg" alt="" width="400"/>
 
 
+**Dectivate ramming**
+
+Filament Settings->Multimaterial->Multimaterial parameters with single extruder MM printers->ramming parameters
+
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_ramming.jpg" alt="" width="764"/>
+
 
 ## Classic
 
