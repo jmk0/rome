@@ -28,7 +28,9 @@ In case you have a octopus board, the additional extruders can be plugged into t
 
 ROME is also MUCH faster then any regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles this process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
 
-Every multimaterial loading and unloading setting in the slicer will be deactivated and replaced with a simlpe macro. By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fit your needs.
+With its **Ooze Ex** feature, it lets you use the most oozing hotends on the markets, it will still work will produce a clean wipe tower
+
+Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simlpe macro. By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fit your needs.
 
 ```ini
 # -------------------------------------										
