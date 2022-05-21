@@ -120,56 +120,56 @@ The Native Mode handles the filament loading and unloading on the Wipe tower. Fa
 
 **Use relative E distances**
 
-Printer Settings->General->Advanced
+Printer Settings->General
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/advanced.jpg" alt="" width="320"/>
 
 
 **Activate additional extruders**
 
-Printer Settings->General->Capabilities
+Printer Settings->General
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/capabilities.jpg" alt="" width="387"/>
 
 
 **Dectivate all multi material parameters**
 
-Printer Settings->Single extruder MM setup->Single extruder multi material parameters
+Printer Settings->Single extruder MM setup
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/mmu_parameters.jpg" alt="" width="407"/>
 
 
 **Dectivate advanced wiping volume**
 
-Printer Settings->Single extruder MM setup->Advanced wipe tower purge volume calculs
+Printer Settings->Single extruder MM setup
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
 
 
 **Dectivate advanced wiping volume**
 
-Printer Settings->General->Advanced wipe tower pure volume calculs
+Printer Settings->General
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
 
 
 **Dectivate toolchange temperature**
 
-Filament Settings->Multimaterial->Multimaterial toolchange temperature
+Filament Settings->Multimaterial
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/toolchange_temperature.jpg" alt="" width="400"/>
 
 
 **Dectivate skinnydip string reduction**
 
-Filament Settings->Multimaterial->Multimaterial toolchange string reduction
+Filament Settings->Multimaterial
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/dip.jpg" alt="" width="454"/>
 
 
 **Dectivate cooling moves and ramming**
 
-Filament Settings->Multimaterial->Multimaterial parameters with single extruder MM printers
+Filament Settings->Multimaterial
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/toolchange_parameters.jpg" alt="" width="400"/>
 
@@ -178,7 +178,7 @@ Filament Settings->Multimaterial->Multimaterial parameters with single extruder 
 
 **Enable wipe tower**
 
-Print Settings->multiple extruders->Wipe tower
+Print Settings->multiple extruders
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower.jpg" alt="" width="584"/>
 
