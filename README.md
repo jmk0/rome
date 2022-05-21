@@ -50,65 +50,65 @@ The Rome Native Mode handles the filament loading and unloading on the Wipe towe
 
 Printer Settings->General->Advanced
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_advanced.jpg" alt="" width="320"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/advanced.jpg" alt="" width="320"/>
 
 
 **Activate additional extruders**
 
 Printer Settings->General->Capabilities
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_capabilities.jpg" alt="" width="387"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/capabilities.jpg" alt="" width="387"/>
 
 
 **Dectivate all multi material parameters**
 
 Printer Settings->Single extruder MM setup->Single extruder multi material parameters
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_mmu_parameters.jpg" alt="" width="407"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/mmu_parameters.jpg" alt="" width="407"/>
 
 
 **Dectivate advanced wiping volume**
 
 Printer Settings->Single extruder MM setup->Advanced wipe tower purge volume calculs
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wiping_volume.jpg" alt="" width="462"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
 
 
 **Dectivate advanced wiping volume**
 
 Printer Settings->General->Advanced wipe tower pure volume calculs
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wiping_volume.jpg" alt="" width="462"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
 
 
 **Dectivate toolchange temperature**
 
 Filament Settings->Multimaterial->Multimaterial toolchange temperature
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_toolchange_temperature.jpg" alt="" width="400"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/toolchange_temperature.jpg" alt="" width="400"/>
 
 
 **Dectivate skinnydip string reduction**
 
 Filament Settings->Multimaterial->Multimaterial toolchange string reduction
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_dip.jpg" alt="" width="454"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/dip.jpg" alt="" width="454"/>
 
 
 **Dectivate cooling moves and ramming**
 
 Filament Settings->Multimaterial->Multimaterial parameters with single extruder MM printers
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_toolchange_parameters.jpg" alt="" width="400"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/toolchange_parameters.jpg" alt="" width="400"/>
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_ramming.jpg" alt="" width="764"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/ramming.jpg" alt="" width="764"/>
 
 
 **Enable wipe tower**
 
 Print Settings->multiple extruders->Wipe tower
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wipe_tower.jpg" alt="" width="584"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower.jpg" alt="" width="584"/>
 
 
 ## Classic
