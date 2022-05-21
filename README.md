@@ -104,6 +104,13 @@ Filament Settings->Multimaterial->Multimaterial parameters with single extruder 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_ramming.jpg" alt="" width="764"/>
 
 
+**Enable wipe tower**
+
+Print Settings->multiple extruders->Wipe tower
+
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/slicer_wipe_tower.jpg" alt="" width="584"/>
+
+
 ## Classic
 
 The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer proeprly.
