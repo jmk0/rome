@@ -15,6 +15,7 @@ A multi extruder to direct extruder solution for RatOS
     - [G-code](#G-code)
     - [Native](#native)
 - [Hardware](#hardware)
+- [Configuration](#configuration)
 
 
 # Intro
@@ -236,4 +237,31 @@ insert_gcode:
   ROME_INSERT_GCODE
 runout_gcode:
   ROME_RUNOUT_GCODE
+```
+
+# Configuration
+
+```ini
+# -------------------------------------										
+#  ROME CONFIGURATION
+# -------------------------------------										
+[rome]
+heater_timeout: 600                             # Heater Timeout in case of rome paused the print
+
+unload_filament_after_print: 1                  # 1 = unloads filament after a printing
+                                                # 0 = filament stays in hotend
+
+wipe_tower_acceleration: 25000                  # printer acceleration when printing the wipe tower
+
+use_ooze_ex: 1                                  # 1 = rome distributes oozed material over the length of the wipe tower
+                                                # 0 = try your luck 
+
+nozzle_loading_speed_mms: 10                    # extruder speed when moving the filament between the parking position and the nozzle 
+filament_homing_speed_mms: 75                   # extruder speed when moving the filament inside bowden tube
+filament_parking_speed_mms: 50                  # extruder speed when moving the filament between the filament sensor and the parking position
+
+toolhead_sensor_to_reverse_bowden_mm: 210       # distance between the filament sensor and the parking position behind the y-junction
+toolhead_sensor_to_extruder_gear_mm: 45         # distance between the filament sensor and the extruder gears
+extruder_gear_to_parking_position_mm: 40        # distance between the extruder gears and the parking position
+parking_position_to_nozzle_mm: 35               # distance between the parking position and the nozzle
 ```
