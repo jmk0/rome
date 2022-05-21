@@ -8,7 +8,7 @@ A multi extruder to direct extruder solution for RatOS
 - [Installation](#installation)
     - [Raspberry](#raspberry)
     - [Moonraker](#moonraker)
-    - [Klipper](#klipper)
+    - [RatOS](#ratos)
 - [Slicer](#slicer)
     - [G-code](#G-code)
     - [Native](#native)
@@ -32,7 +32,7 @@ path: ~/rome
 origin: https://github.com/HelgeKeck/rome.git
 ```
 
-## Klipper 
+## RatOS 
 ```ini
 # ROME
 [include rome/config.cfg]
