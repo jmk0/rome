@@ -3,19 +3,23 @@ RatOS Multi Extruder
 
 A multi extruder to direct extruder solution for RatOS
 
+## Table of Content
+- [Installation](#installation)
+  - [Raspberry](#raspberry)
+  - [Moonraker](#moonraker)
+  - [Klipper](#klipper)
+ 
 # Installation
 
-## On your Raspberry
+## Raspberry
 ```
 cd ~/
 git clone https://github.com/HelgeKeck/rome.git
 bash ~/rome/install.sh
 ```
 
-## Configure Moonraker update manager
+## Moonraker
 ```ini
-# moonraker.conf
-
 [update_manager rome]
 type: git_repo
 primary_branch: main
@@ -23,11 +27,8 @@ path: ~/rome
 origin: https://github.com/HelgeKeck/rome.git
 ```
 
-## Activate ROME in your Klipper printer.cfg 
+## Klipper 
 ```ini
-# printer.cfg
-
 # ROME
 [include rome/config.cfg]
-
 ```
