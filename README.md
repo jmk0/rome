@@ -24,7 +24,29 @@ Im having a MMU and like it, but i realized that 99% of my multimaterial prints 
 
 I had two spare extruders in my drawer and thought this could be an interesting project.
 
-This setup is much faster, the unloading and loading process is multiple times faster than with a MMU or ERCF, Rome just have to park the filament behind the y-junction.
+ROME is MUCH faster then a regular MMU or ERCF setup, the whole filament unloading and loading process is multiple times faster, not only because ROME just have to park the filament behind the y-junction, in its native mode, ROME handles this process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination.
+
+Every multimaterial loading and unloading setting in the slicer will be deactivated and replaced with a macro.
+
+```ini
+# -------------------------------------										
+# Unload from nozzle
+# Rapido UHF
+# Prusament PETG @ 250°
+# -------------------------------------										
+[gcode_macro _UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION]
+gcode:
+  G92 E0
+  G0 E-25 F3600
+  G4 P500
+  G92 E0
+  G0 E20 F3600
+  G4 P100
+  G92 E0
+  G0 E-25 F3600
+  G4 P500
+  M400
+```
 
 In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
 
@@ -84,13 +106,13 @@ SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_1
 SET_PRESSURE_ADVANCE ADVANCE=0.065 SMOOTH_TIME=0.04 EXTRUDER=rome_extruder_2
 ```
 
-## Rome Modes 
+## ROME Modes 
 
-Rome can operate in two different modes, Native and Classic.
+ROME can operate in two different modes, Native and Classic.
 
-The Rome Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
+The ROME Native Mode handles the filament loading and unloading on the Wipe tower. Faster filament changes, less Slicer configuration needed and more control over the process.
 
-The Rome Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would do for the MMU or ERCF.
+The ROME Classic Mode works exactly like the MMU or ERCF. You are responsible to configure the Slicer like you would do for the MMU or ERCF.
 
 ## Native 
 
@@ -163,7 +185,7 @@ Print Settings->multiple extruders->Wipe tower
 
 ## Primary Extruder
 
-Rome is by default configured to use it with Orbiter Extruders on a Octopus mainboard. In case you want to use other extruders or mainboard you can override these sections in your printer.cfg
+ROME is by default configured to use it with Orbiter Extruders on a Octopus mainboard. In case you want to use other extruders or mainboard you can override these sections in your printer.cfg
 
 ```ini
 # -------------------------------------										
@@ -246,14 +268,14 @@ runout_gcode:
 #  ROME CONFIGURATION
 # -------------------------------------										
 [rome]
-heater_timeout: 600                             # Heater Timeout in case of rome paused the print
+heater_timeout: 600                             # Heater Timeout in case of ROME paused the print
 
 unload_filament_after_print: 1                  # 1 = unloads filament after a printing
                                                 # 0 = filament stays in hotend
 
 wipe_tower_acceleration: 25000                  # printer acceleration when printing the wipe tower
 
-use_ooze_ex: 1                                  # 1 = rome distributes oozed material over the length of the wipe tower
+use_ooze_ex: 1                                  # 1 = ROME distributes oozed material over the length of the wipe tower
                                                 # 0 = try your luck 
 
 nozzle_loading_speed_mms: 10                    # extruder speed when moving the filament between the parking position and the nozzle 
@@ -264,4 +286,24 @@ toolhead_sensor_to_reverse_bowden_mm: 210       # distance between the filament 
 toolhead_sensor_to_extruder_gear_mm: 45         # distance between the filament sensor and the extruder gears
 extruder_gear_to_parking_position_mm: 40        # distance between the extruder gears and the parking position
 parking_position_to_nozzle_mm: 35               # distance between the parking position and the nozzle
+```
+
+# Unload
+
+```ini
+# -------------------------------------										
+#  Unload from nozzle
+# -------------------------------------										
+[gcode_macro _UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION]
+gcode:
+  G92 E0
+  G0 E-25 F3600
+  G4 P500
+  G92 E0
+  G0 E20 F3600
+  G4 P100
+  G92 E0
+  G0 E-25 F3600
+  G4 P500
+  M400
 ```
