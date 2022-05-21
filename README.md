@@ -6,10 +6,10 @@ A multi extruder to direct extruder solution for RatOS
 
 ## Table of Content
 - [Installation](#installation)
-  - [Raspberry](#raspberry)
-  - [Moonraker](#moonraker)
-  - [Klipper](#klipper)
-  - [Slicer](#slicer)
+    - [Raspberry](#raspberry)
+    - [Moonraker](#moonraker)
+    - [Klipper](#klipper)
+- [Slicer](#slicer)
     - [Native](#native)
     - [Classic](#classic)
  
