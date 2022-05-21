@@ -224,3 +224,16 @@ driver_HEND: 9
 driver_HSTRT: 7
 ```
 
+## Filament Sensor
+
+```ini
+[filament_switch_sensor extruder_filament_sensor]
+pause_on_runout: False
+event_delay: 0.1
+pause_delay: 0.1
+switch_pin: ^!PG15
+insert_gcode:
+  M117 Filament inserted...
+runout_gcode:
+  M117 Filament runbout...
+```
