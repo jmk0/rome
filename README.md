@@ -3,7 +3,7 @@ RatOS Multi Extruder
 
 A multi extruder to direct extruder solution for RatOS
 
-High speed multi material printing, currently limited to 2 Extruders.
+High speed multi material printing with as many extruders as you want
 
 ## Table of Content
 - [Intro](#intro)
@@ -87,7 +87,7 @@ Add this to the users overrides section in your printer.cfg
 
 **Printer Start G-code**
 ```
-ROME_START_PRINT EXTRUDER_TEMP=[first_layer_temperature] BED_TEMP=[first_layer_bed_temperature] TOOL=[initial_tool] WIPE_TOWER={wipe_tower} WIPE_TOWER_X={wipe_tower_x} WIPE_TOWER_Y={wipe_tower_y} WIPE_TOWER_WIDTH={wipe_tower_width} WIPE_TOWER_ROTATION_ANGLE={wipe_tower_rotation_angle} COOLING_TUBE_RETRACTION={cooling_tube_retraction} COOLING_TUBE_LENGTH={cooling_tube_length} PARKING_POS_RETRACTION={parking_pos_retraction} EXTRA_LOADING_MOVE={extra_loading_move}
+ROME_START_PRINT EXTRUDER_TEMP=[first_layer_temperature] BED_TEMP=[first_layer_bed_temperature] TOOL=[initial_tool] EXTRUDERS_COUNT=[extruders_count] WIPE_TOWER={wipe_tower} WIPE_TOWER_X={wipe_tower_x} WIPE_TOWER_Y={wipe_tower_y} WIPE_TOWER_WIDTH={wipe_tower_width} WIPE_TOWER_ROTATION_ANGLE={wipe_tower_rotation_angle} COOLING_TUBE_RETRACTION={cooling_tube_retraction} COOLING_TUBE_LENGTH={cooling_tube_length} PARKING_POS_RETRACTION={parking_pos_retraction} EXTRA_LOADING_MOVE={extra_loading_move}
 ```
 
 **Printer End G-code**
@@ -272,14 +272,16 @@ runout_gcode:
 #  ROME CONFIGURATION
 # -------------------------------------										
 [rome]
-heater_timeout: 600                             # Heater Timeout in case of ROME paused the print
+tool_count: 2                                   # number of tools
+
+heater_timeout: 600                             # Heater Timeout in case of rome paused the print
 
 unload_filament_after_print: 1                  # 1 = unloads filament after a printing
                                                 # 0 = filament stays in hotend
 
 wipe_tower_acceleration: 25000                  # printer acceleration when printing the wipe tower
 
-use_ooze_ex: 1                                  # 1 = ROME distributes oozed material over the length of the wipe tower
+use_ooze_ex: 1                                  # 1 = rome distributes oozed material over the length of the wipe tower
                                                 # 0 = try your luck 
 
 nozzle_loading_speed_mms: 10                    # extruder speed when moving the filament between the parking position and the nozzle 

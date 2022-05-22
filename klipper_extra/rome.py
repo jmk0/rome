@@ -20,7 +20,7 @@ class ROME:
         self.register_handle_connect()
 
     def load_settings(self):
-        self.tool_count = 2
+        self.tool_count = self.config.getint('tool_count', 2)
 
         self.heater_timeout = self.config.getfloat('heater_timeout', 600.0)
         self.unload_filament_after_print = self.config.getfloat('unload_filament_after_print', 1)
@@ -66,13 +66,14 @@ class ROME:
         return nextwake
 
     # -----------------------------------------------------------------------------------------------------------------------------
-    # GCode Registration
+    # G-Code Registration
     # -----------------------------------------------------------------------------------------------------------------------------
     def register_commands(self):
         self.gcode.register_command('HOME_ROME', self.cmd_HOME_ROME, desc=("HOME_ROME"))
         self.gcode.register_command('_PAUSE_ROME', self.cmd_PAUSE_ROME, desc=("_PAUSE_ROME"))
         self.gcode.register_command('_RESUME_ROME', self.cmd_RESUME_ROME, desc=("_RESUME_ROME"))
         self.gcode.register_command('LOAD_TOOL', self.cmd_LOAD_TOOL, desc=("LOAD_TOOL"))
+        self.gcode.register_command('SELECT_TOOL', self.cmd_SELECT_TOOL, desc=("SELECT_TOOL"))
         self.gcode.register_command('UNLOAD_TOOL', self.cmd_UNLOAD_TOOL, desc=("UNLOAD_TOOL"))
         self.gcode.register_command('CHANGE_TOOL', self.cmd_CHANGE_TOOL, desc=("CHANGE_TOOL"))
         self.gcode.register_command('ROME_END_PRINT', self.cmd_ROME_END_PRINT, desc=("ROME_END_PRINT"))
@@ -80,9 +81,13 @@ class ROME:
         self.gcode.register_command('ROME_INSERT_GCODE', self.cmd_ROME_INSERT_GCODE, desc=("ROME_INSERT_GCODE"))
         self.gcode.register_command('ROME_RUNOUT_GCODE', self.cmd_ROME_RUNOUT_GCODE, desc=("ROME_RUNOUT_GCODE"))
 
+    def cmd_SELECT_TOOL(self, param):
+        tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
+        self.select_tool(tool)
+
     def cmd_LOAD_TOOL(self, param):
         self.cmd_origin = "gcode"
-        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
+        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         if not self.load_tool(tool, temp):
             self.pause_rome()
@@ -90,7 +95,7 @@ class ROME:
 
     def cmd_UNLOAD_TOOL(self, param):
         self.cmd_origin = "gcode"
-        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count - 1)
+        tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
 
         # set hotend temperature
@@ -114,7 +119,7 @@ class ROME:
 
     def cmd_ROME_END_PRINT(self, param):
         self.cmd_origin = "gcode"
-        self.gcode.run_script_from_command("_ROME_END_PRINT")
+        self.gcode.run_script_from_command("END_PRINT")
         if self.unload_filament_after_print == 1:
             if self.filament_sensor_triggered():
                 self.unload_tool()
@@ -141,12 +146,12 @@ class ROME:
         else:
             self.mode = "slicer"
         
-        tool = param.get_int('TOOL', None, minval=0, maxval=4)
+        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
         bed_temp = param.get_int('BED_TEMP', None, minval=-1, maxval=self.heater.max_temp)
         extruder_temp = param.get_int('EXTRUDER_TEMP', None, minval=-1, maxval=self.heater.max_temp)
 
         self.gcode.run_script_from_command("SET_GCODE_VARIABLE MACRO=RatOS VARIABLE=relative_extrusion VALUE=True")
-        self.gcode.run_script_from_command("SET_GCODE_VARIABLE MACRO=_START_PRINT_AFTER_HEATING_EXTRUDER VARIABLE=tool VALUE=" + str(tool))
+        self.gcode.run_script_from_command("SET_GCODE_VARIABLE MACRO=_START_PRINT_AFTER_HEATING_EXTRUDER VARIABLE=tool VALUE=" + str(tool + 1))
         self.gcode.run_script_from_command("START_PRINT BED_TEMP=" + str(bed_temp) + " EXTRUDER_TEMP=" + str(extruder_temp))
 
     def cmd_PAUSE_ROME(self, param):
@@ -178,9 +183,9 @@ class ROME:
             return False
 
         # home filaments
-        if not self.home_filament(0):
-            return False
         if not self.home_filament(1):
+            return False
+        if not self.home_filament(2):
             return False
 
         self.Homed = True
@@ -218,8 +223,8 @@ class ROME:
 
     def home_filament(self, filament):
  
-        # select filament
-        self.select_filament(filament)
+        # select tool
+        self.select_tool(filament)
 
         # home filament
         if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(False):
@@ -251,7 +256,7 @@ class ROME:
         self.cmd_origin = "rome"
         if self.Filament_Changes > 0:
             self.before_change()
-            if not self.load_tool(tool, -1):
+            if not self.load_tool(tool + 1, -1):
                 return False
             self.after_change()
         self.Filament_Changes = self.Filament_Changes + 1
@@ -284,9 +289,7 @@ class ROME:
             if not self.unload_tool():
                 self.respond("could not unload tool!")
                 return False
-        if not self.select_filament(tool):
-            self.respond("could not select filament!")
-            return False
+        self.select_tool(tool)
         if not self.load_filament_from_reverse_bowden_to_toolhead_sensor():
             self.respond("could not load tool to sensor!")
             return False
@@ -304,7 +307,7 @@ class ROME:
     def unload_tool(self):
 
         # select tool
-        self.select_filament(self.Selected_Filament)
+        self.select_tool(self.Selected_Filament)
 
         # unload tool
         if self.mode != "slicer":
@@ -366,35 +369,28 @@ class ROME:
         self.respond("after_change_rome_slicer")
 
     # -----------------------------------------------------------------------------------------------------------------------------
-    # Select Filament
+    # Select Tool
     # -----------------------------------------------------------------------------------------------------------------------------
     Selected_Filament = -1
 
-    def select_filament(self, tool=-1):
-
-        # unselect filament
-        if not self.unselect_filament():
-            return False
-
-        # select filament
-        if tool == 0 or tool == -1:
-            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=extruder')
-        if tool == 1 or tool == -1:
-            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_2 MOTION_QUEUE=extruder')
+    def select_tool(self, tool=-1):
+        if tool == 0:
+            self.respond("unselecting tools")
+        elif tool == -1:
+            self.respond("selecting all tools")
+        else:
+            self.respond("selecting tool " + str(tool))
+        self.unselect_tool()
+        if tool != 0:
+            for i in range(1, self.tool_count + 1):
+                if tool == i or tool == -1:
+                    self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_' + str(i) + ' MOTION_QUEUE=extruder')
         self.Selected_Filament = tool
 
-        # success
-        return True
-
-    def unselect_filament(self):
-
-        # unselect filament
+    def unselect_tool(self):
         self.Selected_Filament = -1
-        self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_1 MOTION_QUEUE=')
-        self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_2 MOTION_QUEUE=')
-
-        # success
-        return True
+        for i in range(1, self.tool_count + 1):
+            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_' + str(i) + ' MOTION_QUEUE=')
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Load Filament
@@ -585,7 +581,9 @@ class ROME:
     def pause_rome(self):
         self.Paused = True
         self.enable_heater_timeout()
-        self.gcode.run_script_from_command('_ROME_PAUSE')
+        self.gcode.run_script_from_command("SAVE_GCODE_STATE NAME=PAUSE_state")
+        self.gcode.run_script_from_command("SET_IDLE_TIMEOUT TIMEOUT=36000")
+        self.gcode.run_script_from_command("{printer.configfile.settings['gcode_macro pause'].rename_existing}")
 
     def resume_rome(self):
         self.Paused = False
@@ -594,7 +592,8 @@ class ROME:
             self.gcode.run_script_from_command('G0 Z' + str(self.exchange_old_position[2] + 2) + ' F3600')
             self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' Y' + str(self.exchange_old_position[1]) + ' F3600')
             self.gcode.run_script_from_command('M400')
-        self.gcode.run_script_from_command("_ROME_RESUME")
+        self.gcode.run_script_from_command("RESTORE_GCODE_STATE NAME=PAUSE_state MOVE=60")
+        self.gcode.run_script_from_command("{printer.configfile.settings['gcode_macro resume'].rename_existing}")
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Helper
