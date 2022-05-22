@@ -118,6 +118,7 @@ class ROME:
         if self.unload_filament_after_print == 1:
             if self.filament_sensor_triggered():
                 self.unload_tool()
+                self.gcode.run_script_from_command('M84')
         self.Homed = False
 
     def cmd_ROME_START_PRINT(self, param):
