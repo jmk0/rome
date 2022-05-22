@@ -257,6 +257,8 @@ driver_HSTRT: 7
 
 ## Filament Sensor
 
+You can use any type of sensor, jsut make sure to name it `toolhead_filament_sensor`.
+
 ```ini
 [filament_switch_sensor toolhead_filament_sensor]
 pause_on_runout: False
