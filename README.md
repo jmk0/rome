@@ -278,7 +278,7 @@ runout_gcode:
 #  ROME CONFIGURATION
 # -------------------------------------										
 [rome]
-tool_count: 2                                   # number of tools
+tool_count: 2                                   # number of feeding extruders
 
 heater_timeout: 600                             # Heater Timeout in case of rome paused the print
 
