@@ -13,7 +13,7 @@ class ROME:
         self.printer = self.config.get_printer()
         self.reactor = self.printer.get_reactor()
         self.gcode = self.printer.lookup_object('gcode')
-        self.extruder_filament_sensor = self.printer.lookup_object("filament_switch_sensor extruder_filament_sensor")
+        self.toolhead_filament_sensor = self.printer.lookup_object("filament_switch_sensor toolhead_filament_sensor")
 
         self.load_settings()
         self.register_commands()
@@ -622,7 +622,7 @@ class ROME:
         self.gcode.respond_raw(message)
 
     def filament_sensor_triggered(self):
-        return bool(self.extruder_filament_sensor.runout_helper.filament_present)
+        return bool(self.toolhead_filament_sensor.runout_helper.filament_present)
 
     def extruder_set_temperature(self, temperature, wait):
         self.pheaters.set_temperature(self.heater, temperature, wait)

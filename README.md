@@ -207,7 +207,7 @@ max_extrude_cross_section: 999999
 
 You can add as many secondary extruders as you want.
 
-Just make sure they follow this pattern `rome_extruder_1`, `rome_extruder_2`, ....
+Make sure they follow this pattern `rome_extruder_1`, `rome_extruder_2`, ....
 
 ```ini
 # -------------------------------------										
@@ -258,7 +258,7 @@ driver_HSTRT: 7
 ## Filament Sensor
 
 ```ini
-[filament_switch_sensor extruder_filament_sensor]
+[filament_switch_sensor toolhead_filament_sensor]
 pause_on_runout: False
 event_delay: 0.1
 pause_delay: 0.1
