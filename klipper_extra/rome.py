@@ -145,7 +145,9 @@ class ROME:
         bed_temp = param.get_int('BED_TEMP', None, minval=-1, maxval=self.heater.max_temp)
         extruder_temp = param.get_int('EXTRUDER_TEMP', None, minval=-1, maxval=self.heater.max_temp)
 
-        self.gcode.run_script_from_command("_ROME_START_PRINT TOOL=" + str(tool) + " BED_TEMP=" + str(bed_temp) + " EXTRUDER_TEMP=" + str(extruder_temp))
+        self.gcode.run_script_from_command("SET_GCODE_VARIABLE MACRO=RatOS VARIABLE=relative_extrusion VALUE=True")
+        self.gcode.run_script_from_command("SET_GCODE_VARIABLE MACRO=_START_PRINT_AFTER_HEATING_EXTRUDER VARIABLE=tool VALUE=" + str(tool))
+        self.gcode.run_script_from_command("START_PRINT BED_TEMP=" + str(bed_temp) + " EXTRUDER_TEMP=" + str(extruder_temp))
 
     def cmd_PAUSE_ROME(self, param):
         self.pause_rome()
