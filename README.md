@@ -207,6 +207,8 @@ max_extrude_cross_section: 999999
 
 You can add as many secondary extruders as you want.
 
+Just make sure they follow this pattern `rome_extruder_1`, `rome_extruder_2`, ....
+
 ```ini
 # -------------------------------------										
 # Rome Extruder 1
