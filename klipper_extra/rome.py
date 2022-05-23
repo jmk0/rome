@@ -463,12 +463,12 @@ class ROME:
 
         # unload filament to parking position
         if self.cmd_origin != "rome" or self.use_ooze_ex == 0: 
-            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION PAUSE=3000')
         else:
             self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
-            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION')
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION PAUSE=0')
             self.gcode.run_script_from_command('G0 X' + str(self.exchange_old_position[0]) + ' F600')
-            self.gcode.run_script_from_command('G4 P1000')
+            #self.gcode.run_script_from_command('G4 P1000')
 
         # success
         return True
