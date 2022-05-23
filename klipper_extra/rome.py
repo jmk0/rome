@@ -100,7 +100,7 @@ class ROME:
 
         # set hotend temperature
         if temp > 0:
-            self.set_hotend_temperature()
+            self.set_hotend_temperature(temp)
 
         # unload tool
         self.Selected_Filament = tool
@@ -266,7 +266,7 @@ class ROME:
         
         # set hotend temperature
         if temp > 0:
-            self.set_hotend_temperature()
+            self.set_hotend_temperature(temp)
 
         # home if not homed yet
         if not self.Homed:
