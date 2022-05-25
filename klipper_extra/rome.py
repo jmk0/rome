@@ -20,6 +20,10 @@ class ROME:
         self.register_handle_connect()
 
     def load_settings(self):
+        self.idler_stepper = None
+
+        self.rome_setup = self.config.getint('rome_setup', 0)
+
         self.tool_count = self.config.getint('tool_count', 2)
 
         self.heater_timeout = self.config.getfloat('heater_timeout', 600.0)
@@ -44,6 +48,14 @@ class ROME:
         self.extruder = self.printer.lookup_object('extruder')
         self.pheaters = self.printer.lookup_object('heaters')
         self.heater = self.extruder.get_heater()
+
+        if self.rome_setup == 1:
+            for manual_stepper in self.printer.lookup_objects('manual_stepper'):
+                rail_name = manual_stepper[1].get_steppers()[0].get_name()
+                if rail_name == 'manual_stepper idler_stepper':
+                    self.idler_stepper = manual_stepper[1]
+            if self.idler_stepper is None:
+                raise self.config.error("Idler Stepper not found!")
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Heater Timeout Handler
@@ -182,20 +194,31 @@ class ROME:
         if not self.can_home():
             return False
 
-        # home filaments
-        if not self.home_filament(1):
-            return False
-        if not self.home_filament(2):
-            return False
+        # home rome types
+        if self.rome_setup == 0:
+            # home extruder feeder
+            if not self.home_extruder_feeder():
+                return False
+        elif self.rome_setup == 1:
+            # home mmu splitter
+            if not self.home_mmu_splitter():
+                return False
 
-        self.Homed = True
-        self.Selected_Filament = -1
+        # home filaments
+        # we skip this step for the MMU because we dont know if each slot is loaded with filament
+        if self.rome_setup != 1:
+            for i in range(1, self.tool_count + 1):
+                if not self.home_filament(i):
+                    return False
 
         # success
+        self.Homed = True
+        self.Selected_Filament = -1
+        self.respond("Welcome Home Rome!")
         return True
 
     def can_home(self):
-
+        
         # check hotend temperature
         if not self.extruder_can_extrude():
             self.respond("Preheat Nozzle to " + str(self.heater.min_extrude_temp + 10))
@@ -222,7 +245,7 @@ class ROME:
         return True
 
     def home_filament(self, filament):
- 
+     
         # select tool
         self.select_tool(filament)
 
@@ -236,6 +259,50 @@ class ROME:
 
         # success
         return True
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Home Extruder Feeder
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+    def home_extruder_feeder(self):
+    
+        # success
+        return True
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Home MMU Splitter
+    # -----------------------------------------------------------------------------------------------------------------------------
+    Idler_Homed = False
+
+    idler_selecting_speed = 125
+    idler_selecting_accel = 80
+    idler_home_position = 85
+    idler_homeing_speed = 40
+    idler_homeing_accel = 40
+    idler_positions = [5,20,35,50,65]
+
+    def home_mmu_splitter(self):
+        
+        # home idler
+        self.home_idler()
+
+        # success
+        return True
+
+    def home_idler(self):
+        if self.Idler_Homed:
+            self.stepper_move(self.idler_stepper, self.idler_home_position, True, self.idler_homeing_speed, self.idler_homeing_accel)
+            return
+        home_current = 0.1
+        driver_status = self.stepper_driver_status('idler_stepper')
+        self.gcode.run_script_from_command('SET_TMC_CURRENT STEPPER=idler_stepper CURRENT=' + str(home_current) + ' HOLDCURRENT=' + str(home_current))
+        self.idler_stepper.do_set_position(0.0)
+        self.stepper_move(self.idler_stepper, 7, True, self.idler_homeing_speed, self.idler_homeing_accel)
+        self.stepper_homing_move(self.idler_stepper, -95, True, self.idler_homeing_speed, self.idler_homeing_accel, 1)
+        self.idler_stepper.do_set_position(2.0)
+        self.stepper_move(self.idler_stepper, self.idler_home_position, True, self.idler_homeing_speed, self.idler_homeing_accel)
+        self.gcode.run_script_from_command('SET_TMC_CURRENT STEPPER=idler_stepper CURRENT=' + str(driver_status['run_current']) + ' HOLDCURRENT=' + str(driver_status['hold_current']))
+        self.Idler_Homed = True
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Change Tool
@@ -318,6 +385,10 @@ class ROME:
         if not self.unload_filament_from_toolhead_sensor_to_reverse_bowden():
             return False
 
+        # release mmu splitter idler
+        if self.rome_setup == 1:
+            self.select_idler(-1)
+
         # success
         return True
 
@@ -381,16 +452,42 @@ class ROME:
         else:
             self.respond("selecting tool " + str(tool))
         self.unselect_tool()
+        if self.rome_setup == 0:
+            self.select_tool_extruder_feeder(tool)
+        elif self.rome_setup == 1:
+            self.select_tool_mmu_splitter(tool)
+        self.Selected_Filament = tool
+
+    def select_tool_extruder_feeder(self, tool):
         if tool != 0:
             for i in range(1, self.tool_count + 1):
                 if tool == i or tool == -1:
                     self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_' + str(i) + ' MOTION_QUEUE=extruder')
-        self.Selected_Filament = tool
+
+    def select_tool_mmu_splitter(self, tool):
+        self.select_idler(tool)
 
     def unselect_tool(self):
+        if self.rome_setup == 0:
+            self.unselect_tool_extruder_feeder()
+        elif self.rome_setup == 1:
+            self.unselect_tool_mmu_splitter()
+
+    def unselect_tool_extruder_feeder(self):
         self.Selected_Filament = -1
         for i in range(1, self.tool_count + 1):
             self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=rome_extruder_' + str(i) + ' MOTION_QUEUE=')
+
+    def unselect_tool_mmu_splitter(self):
+        self.select_idler(-1)
+
+    def select_idler(self, tool):
+        if tool >= 0:
+            self.stepper_move(self.idler_stepper, self.idler_positions[tool - 1], True, self.idler_selecting_speed, self.idler_selecting_accel)
+            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=pulley_extruder MOTION_QUEUE=extruder')
+        else:
+            self.stepper_move(self.idler_stepper, self.idler_home_position, True, self.idler_selecting_speed, self.idler_selecting_accel)
+            self.gcode.run_script_from_command('SYNC_EXTRUDER_MOTION EXTRUDER=pulley_extruder MOTION_QUEUE=')
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Load Filament
@@ -436,6 +533,10 @@ class ROME:
         self.gcode.run_script_from_command('G0 E' + str(self.toolhead_sensor_to_extruder_gear_mm + self.extruder_gear_to_parking_position_mm) + ' F' + str(self.filament_parking_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
+        # release mmu splitter idler
+        if self.rome_setup == 1:
+            self.select_idler(-1)
+
         # success
         return True
 
@@ -475,6 +576,10 @@ class ROME:
 
     def unload_filament_from_parking_position_to_toolhead_sensor(self):
         
+        # select mmu splitter idler
+        if self.rome_setup == 1:
+            self.select_idler(self.Selected_Filament)
+
         # unload filament to toolhead sensor
         self.gcode.run_script_from_command('G92 E0')
         self.gcode.run_script_from_command('M400')
@@ -598,6 +703,25 @@ class ROME:
     # -----------------------------------------------------------------------------------------------------------------------------
     # Helper
     # -----------------------------------------------------------------------------------------------------------------------------
+    def stepper_move(self, stepper, dist, wait, speed, accel):
+        stepper.do_move(dist, speed, accel, True)
+        if wait:
+            self.toolhead.wait_moves()      
+
+    def stepper_homing_move(self, stepper, dist, wait, speed, accel, homing_move):
+        stepper.do_homing_move(dist, speed, accel, homing_move > 0, abs(homing_move) == 1)
+        if wait:
+            self.toolhead.wait_moves()      
+
+    def stepper_endstop_triggered(self, manual_stepper):
+        endstop = manual_stepper.rail.get_endstops()[0][0]
+        state = endstop.query_endstop(self.toolhead.get_last_move_time())
+        return bool(state)
+
+    def stepper_driver_status(self, stepper_name):
+        driver_config = self.printer.lookup_object("tmc2209 manual_stepper " + stepper_name)
+        return driver_config.get_status()
+
     def set_hotend_temperature(self, temp):
         
         # set hotend temperature

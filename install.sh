@@ -49,6 +49,10 @@ function link_rome_macros {
         if [ -d "${ROME_DIR}" ]; then
             echo "Linking macro files..."
             ln -sf "${SRCDIR}/klipper_macro/config.cfg" "${ROME_DIR}/config.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/extruder_feeder.cfg" "${ROME_DIR}/extruder_feeder.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/extruder.cfg" "${ROME_DIR}/extruder.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/filament_sensor.cfg" "${ROME_DIR}/filament_sensor.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/mmu_splitter.cfg" "${ROME_DIR}/mmu_splitter.cfg"
             ln -sf "${SRCDIR}/klipper_macro/hardware.cfg" "${ROME_DIR}/hardware.cfg"
             ln -sf "${SRCDIR}/klipper_macro/macros.cfg" "${ROME_DIR}/macros.cfg"
         else
