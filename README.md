@@ -311,6 +311,7 @@ By default ROME is configured for a Rapido UHF and PETG. If you have another com
 # Prusament PETG @ 250°
 # -------------------------------------										
 [gcode_macro _UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION]
+variable_parameter_PAUSE : 3000
 gcode:
   # initial retract
   G92 E0
@@ -323,7 +324,7 @@ gcode:
   # move to parking position, the center of the ptfe tube that goes to your hotend
   G92 E0
   G0 E-35 F3600
-  G4 P500
+  G4 P{params.PAUSE|default(3000)|int}
   # wait for movements
   M400
 ```
