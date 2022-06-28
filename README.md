@@ -278,7 +278,10 @@ runout_gcode:
 #  ROME CONFIGURATION
 # -------------------------------------										
 [rome]
-tool_count: 2                                   # number of feeding extruders
+rome_setup: 1                                   # 0 = extruder feeder
+                                                # 1 = mmu splitter
+
+tool_count: 2                                   # number of tools
 
 heater_timeout: 600                             # Heater Timeout in case of rome paused the print
 
@@ -294,7 +297,8 @@ nozzle_loading_speed_mms: 10                    # extruder speed when moving the
 filament_homing_speed_mms: 75                   # extruder speed when moving the filament inside bowden tube
 filament_parking_speed_mms: 50                  # extruder speed when moving the filament between the filament sensor and the parking position
 
-toolhead_sensor_to_reverse_bowden_mm: 210       # distance between the filament sensor and the parking position behind the y-junction
+toolhead_sensor_to_bowden_cache_mm: 780         # distance between the filament sensor and the filament caching position
+toolhead_sensor_to_bowden_parking_mm: 780       # distance between the filament sensor and the filament parking position
 toolhead_sensor_to_extruder_gear_mm: 45         # distance between the filament sensor and the extruder gears
 extruder_gear_to_parking_position_mm: 40        # distance between the extruder gears and the parking position
 parking_position_to_nozzle_mm: 35               # distance between the parking position and the nozzle
@@ -311,6 +315,7 @@ By default ROME is configured for a Rapido UHF and PETG. If you have another com
 # Prusament PETG @ 250°
 # -------------------------------------										
 [gcode_macro _UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION]
+variable_parameter_PAUSE : 3000
 gcode:
   # initial retract
   G92 E0
@@ -323,7 +328,7 @@ gcode:
   # move to parking position, the center of the ptfe tube that goes to your hotend
   G92 E0
   G0 E-35 F3600
-  G4 P500
+  G4 P{params.PAUSE|default(3000)|int}
   # wait for movements
   M400
 ```
