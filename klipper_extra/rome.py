@@ -15,6 +15,8 @@ class ROME:
         self.reactor = self.printer.get_reactor()
         self.gcode = self.printer.lookup_object('gcode')
         self.toolhead_filament_sensor = self.printer.lookup_object("filament_switch_sensor toolhead_filament_sensor")
+        self.y1_filament_sensor = None
+        self.y2_filament_sensor = None
 
         self.load_settings()
         self.register_commands()
@@ -30,6 +32,7 @@ class ROME:
         for i in range(1, self.tool_count + 1):
             self.Filament_Cache.append(False)
 
+        self.idle_timeout = self.config.getint('idle_timeout', 3600)
         self.heater_timeout = self.config.getfloat('heater_timeout', 600.0)
         self.unload_filament_after_print = self.config.getfloat('unload_filament_after_print', 1)
         self.wipe_tower_acceleration = self.config.getfloat('wipe_tower_acceleration', 5000.0)
@@ -73,6 +76,13 @@ class ROME:
             if self.idler_stepper is None:
                 raise self.config.error("Idler Stepper not found!")
 
+        for filament_sensor in self.printer.lookup_objects('filament_switch_sensor'):
+            sensor_name = filament_sensor[1].runout_helper.name
+            if sensor_name == 'y1_filament_sensor':
+                self.y1_filament_sensor = filament_sensor[1]
+            if sensor_name == 'y2_filament_sensor':
+                self.y2_filament_sensor = filament_sensor[1]
+
     # -----------------------------------------------------------------------------------------------------------------------------
     # Heater Timeout Handler
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -106,6 +116,7 @@ class ROME:
         self.gcode.register_command('ROME_START_PRINT', self.cmd_ROME_START_PRINT, desc=("ROME_START_PRINT"))
         self.gcode.register_command('ROME_INSERT_GCODE', self.cmd_ROME_INSERT_GCODE, desc=("ROME_INSERT_GCODE"))
         self.gcode.register_command('ROME_RUNOUT_GCODE', self.cmd_ROME_RUNOUT_GCODE, desc=("ROME_RUNOUT_GCODE"))
+        self.gcode.register_command('LOAD_FILAMENTS', self.cmd_LOAD_FILAMENTS, desc=("LOAD_FILAMENTS"))
 
     def cmd_SELECT_TOOL(self, param):
         tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
@@ -117,7 +128,7 @@ class ROME:
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         
         # load tool
-        if not self.load_tool(tool, temp, False):
+        if not self.load_tool(tool, temp, True):
             self.pause_rome()
             return
         
@@ -141,10 +152,6 @@ class ROME:
         self.Homed = False
         if not self.home():
             self.respond("Can not home ROME!")
-            if self.rome_setup == 0:
-                self.select_tool(1)
-            elif self.rome_setup == 1:
-                self.select_tool(-1)
 
     def cmd_CHANGE_TOOL(self, param):
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
@@ -202,6 +209,14 @@ class ROME:
     def cmd_ROME_RUNOUT_GCODE(self, param):
         self.runout_gcode()
 
+    def cmd_LOAD_FILAMENTS(self, param):
+        if not self.Homed:
+            if not self.home():
+                return False
+        if not self.home_filaments():
+            return False
+        return True
+
     # -----------------------------------------------------------------------------------------------------------------------------
     # Home
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -227,13 +242,6 @@ class ROME:
             # home mmu splitter
             if not self.home_mmu_splitter():
                 return False
-
-        # home filaments
-        # we skip this step for the MMU because we dont know if each slot is loaded with filament
-        if self.rome_setup != 1:
-            for i in range(1, self.tool_count + 1):
-                if not self.home_filament(i):
-                    return False
 
         # success
         self.Homed = True
@@ -268,18 +276,15 @@ class ROME:
         # success
         return True
 
-    def home_filament(self, filament):
+    def home_filaments(self):
      
-        # select tool
-        self.select_tool(filament)
-
-        # home filament
-        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(False):
-            self.respond("Filament " + str(filament) + " cant be loaded into the toolhead sensor!")
-            return False
-        if not self.unload_filament_from_toolhead_sensor(-1, 20, -1):
-            self.respond("Filament " + str(filament) + " cant be unloaded from the toolhead sensor!")
-            return False
+        # home filaments
+        if self.rome_setup == 0:
+            if not self.home_extruder_filaments():
+                return False
+        elif self.rome_setup == 1:
+            if not self.home_mmu_splitter_filaments():
+                return False
 
         # success
         return True
@@ -290,6 +295,32 @@ class ROME:
 
     def home_extruder_feeder(self):
     
+        # success
+        return True
+
+    def home_extruder_filaments(self):
+         
+        # home all filaments
+        for i in range(1, self.tool_count + 1):
+            if not self.home_extruder_filament(i):
+                return False
+
+        # success
+        return True
+
+    def home_extruder_filament(self, filament):
+         
+        # select tool
+        self.select_tool(filament)
+
+        # home filament
+        if not self.load_filament_from_reverse_bowden_to_toolhead_sensor(False):
+            self.respond("Filament " + str(filament) + " cant be loaded into the toolhead sensor!")
+            return False
+        if not self.unload_filament_from_toolhead_sensor(-1, -1):
+            self.respond("Filament " + str(filament) + " cant be unloaded from the toolhead sensor!")
+            return False
+
         # success
         return True
 
@@ -321,6 +352,38 @@ class ROME:
         self.idler_stepper.do_set_position(2.0)
         self.stepper_move(self.idler_stepper, self.idler_home_position, True, self.idler_homeing_speed, self.idler_homeing_accel)
         self.gcode.run_script_from_command('SET_TMC_CURRENT STEPPER=idler_stepper CURRENT=' + str(driver_status['run_current']) + ' HOLDCURRENT=' + str(driver_status['hold_current']))
+
+    def home_mmu_splitter_filaments(self):
+         
+        # home all filaments
+        for i in range(1, self.tool_count + 1):
+            if not self.home_mmu_splitter_filament(i):
+                self.respond("could not home filaments!")
+                return False
+
+        # success
+        return True
+
+    def home_mmu_splitter_filament(self, filament):
+         
+        # select tool
+        self.select_tool(filament)
+
+        # home filament
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E100 F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('M400')
+        if not self.y_filament_sensor_triggered():
+            self.respond("filament " + str(filament) + " not found!")
+            return True
+
+        # park filament
+        if not self.park_filament():
+            self.respond("could not park filament " + str(filament) + "!")
+            return False
+
+        # success
+        return True
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Change Tool
@@ -417,8 +480,14 @@ class ROME:
                 return False
         if not self.unload_filament_from_parking_position_to_toolhead_sensor():
             return False
-        if not self.unload_filament_from_toolhead_sensor(new_filament, 0, cache):
+        if not self.unload_filament_from_toolhead_sensor(new_filament, cache):
             return False
+
+        # test if filament has been unloaded behind the y-sensor
+        if not cache:
+            if self.y_filament_sensor_triggered():
+                self.respond("Unload not completed!")
+                return False
 
         # release mmu splitter idler
         if self.rome_setup == 1:
@@ -526,9 +595,11 @@ class ROME:
         load_distance = self.toolhead_sensor_to_bowden_parking_mm
 
         # filament caching
+        is_cached = False
         if self.use_filament_caching == True:
             if self.tool_count > 2:
                 if self.is_filament_cached(self.Selected_Filament):
+                    is_cached = False
                     self.respond("Filament " + str(self.Selected_Filament) + " is cached!")
                     load_distance = self.toolhead_sensor_to_bowden_cache_mm
                 else:
@@ -541,9 +612,25 @@ class ROME:
                         else:
                             self.select_tool(demanded_filament)
 
+        # find filament
+        if self.rome_setup == 1:
+            find_distance = 100
+            if is_cached:
+                load_distance = load_distance - find_distance
+                self.gcode.run_script_from_command('G92 E0')
+                self.gcode.run_script_from_command('G0 E' + str(find_distance) + ' F' + str(self.filament_homing_speed_mms * 60))
+                self.gcode.run_script_from_command('M400')
+                if not self.y_filament_sensor_triggered():
+                    self.gcode.run_script_from_command('G92 E0')
+                    self.gcode.run_script_from_command('G0 E-' + str(find_distance) + ' F' + str(self.filament_homing_speed_mms * 60))
+                    self.gcode.run_script_from_command('M400')
+                    self.respond("Could not find filament " + str(self.Selected_Filament) + "!")
+                    return False
+        self.respond("Filament " + str(self.Selected_Filament) + " found!")
+        
         # initial move
         self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E' + str(load_distance - 20) + ' F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('G0 E' + str(load_distance) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
         # try to find the sensor
@@ -656,7 +743,7 @@ class ROME:
         # success
         return True
 
-    def unload_filament_from_toolhead_sensor(self, new_filament, offset, cache):
+    def unload_filament_from_toolhead_sensor(self, new_filament, cache):
         self.respond("unload_filament_from_toolhead_sensor")
         self.respond("new_filament " + str(new_filament))
 
@@ -674,12 +761,18 @@ class ROME:
 
         # eject filament
         self.gcode.run_script_from_command('G92 E0')
-        self.gcode.run_script_from_command('G0 E-' + str(unload_distance + offset) + ' F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('G0 E-' + str(unload_distance) + ' F' + str(self.filament_homing_speed_mms * 60))
         self.gcode.run_script_from_command('M400')
 
-        # check if filament is ejected
+        # check if filament is ejected from toolhead
         if self.toolhead_filament_sensor_triggered():
             return False
+
+        # park filament
+        if self.rome_setup == 1:
+            if not is_cached:
+                if not self.park_filament():
+                    return False
 
         # uncache filament
         if not is_cached:
@@ -703,8 +796,107 @@ class ROME:
         if self.toolhead_filament_sensor_triggered():
             return False
 
+        # park filament
+        if self.rome_setup == 1:
+            if not self.park_filament():
+                return False
+
         # uncache filament
         self.uncache_filament(self.Selected_Filament)
+
+        # success
+        return True
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    # Parking Parking
+    # -----------------------------------------------------------------------------------------------------------------------------
+    def park_filament(self):
+    
+        # try to find the y sensor
+        self.respond("try to find the sensor...")
+        step_distance = 20
+        max_step_count = 50
+        if self.y_filament_sensor_triggered():
+            for i in range(max_step_count):
+                self.gcode.run_script_from_command('G92 E0')
+                self.gcode.run_script_from_command('G0 E-' + str(step_distance) + ' F' + str(self.filament_homing_speed_mms * 60))
+                self.gcode.run_script_from_command('M400')
+                if not self.y_filament_sensor_triggered():
+                    break
+
+        # check if y sensor was found
+        self.respond("check if y sensor was found...")
+        if self.y_filament_sensor_triggered():
+            self.respond("Y sensor should not be triggered!")
+            return False
+
+        # parking
+        if not self.filament_parking():
+            self.respond("Could not park the filament in the parking sensor!")
+            return False
+
+        # parking filament in final parking position
+        self.gcode.run_script_from_command('G92 E0')
+        self.gcode.run_script_from_command('G0 E-48 F' + str(self.filament_homing_speed_mms * 60))
+        self.gcode.run_script_from_command('M400')
+
+        # success
+        return True
+
+    def filament_parking(self):
+
+        # fast parking
+        if not self.fast_parking():
+            return False
+
+        # exact parking
+        if not self.exact_parking():
+            if not self.fast_parking():
+                return False
+            if not self.exact_parking():
+                return False
+
+        # success
+        return True
+
+    def fast_parking(self):
+
+        # fast parking
+        accuracy_in_mm = 4
+        max_step_count = 20
+
+        # find parking sensor
+        for i in range(max_step_count):
+            self.gcode.run_script_from_command('G92 E0')
+            self.gcode.run_script_from_command('G0 E' + str(accuracy_in_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('M400')
+            if self.y_filament_sensor_triggered():
+                break
+
+        # check parking success
+        if not self.y_filament_sensor_triggered():
+            return False
+
+        # success
+        return True
+    
+    def exact_parking(self):
+
+        # exact parking
+        accuracy_in_mm = 1
+        max_step_count = 20
+
+        # find parking sensor
+        for n in range(max_step_count):
+            self.gcode.run_script_from_command('G92 E0')
+            self.gcode.run_script_from_command('G0 E-' + str(accuracy_in_mm) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('M400')
+            if not self.y_filament_sensor_triggered():
+                break
+
+        # check parking success
+        if self.y_filament_sensor_triggered():
+            return False
 
         # success
         return True
@@ -829,14 +1021,20 @@ class ROME:
 
     def pause_rome(self):
         self.Paused = True
-        self.enable_heater_timeout()
-        self.gcode.run_script_from_command("_PAUSE_ROME")
+
+        # enable heater timeout
+        #if self.heater_timeout > 0:
+        #    self.enable_heater_timeout()
+
+        # call pause macro 
+        self.gcode.run_script_from_command("_PAUSE_ROME IDLE_TIMEOUT=" + str(self.idle_timeout))
 
     def resume_rome(self):
         self.Paused = False
 
         # disable heater timeout
-        self.disable_heater_timeout()
+        if self.heater_timeout > 0:
+            self.disable_heater_timeout()
 
         # go to last position
         if self.exchange_old_position != None:
@@ -897,6 +1095,15 @@ class ROME:
 
     def toolhead_filament_sensor_triggered(self):
         return bool(self.toolhead_filament_sensor.runout_helper.filament_present)
+
+    def y_filament_sensor_triggered(self):
+        if self.Selected_Filament < 3:
+            if self.y1_filament_sensor != None:
+                return bool(self.y1_filament_sensor.runout_helper.filament_present)
+        else:
+            if self.y2_filament_sensor != None:
+                return bool(self.y2_filament_sensor.runout_helper.filament_present)
+        return False
 
     def enable_toolhead_filament_sensor(self):
         self.toolhead_filament_sensor.runout_helper.sensor_enabled = True
