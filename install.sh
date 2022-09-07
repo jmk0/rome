@@ -13,8 +13,16 @@ SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/ && pwd )"
 
 # Default Parameters
 KLIPPER_CONFIG_DIR="${HOME}/klipper_config"
+KLIPPER_CONFIG_MMU_DIR="${HOME}/klipper_config/mmu"
+KLIPPER_CONFIG_FEEDER_DIR="${HOME}/klipper_config/feeder"
 KLIPPY_EXTRAS="${HOME}/klipper/klippy/extras"
 ROME_DIR="${HOME}/klipper_config/rome"
+ROME_BASE_DIR="${HOME}/klipper_config/rome/base"
+ROME_MMU_DIR="${HOME}/klipper_config/rome/mmu"
+ROME_FEEDER_DIR="${HOME}/klipper_config/rome/feeder"
+ROME_EXTRUDER_DIR="${HOME}/klipper_config/rome/extruder"
+ROME_HOTENDS_DIR="${HOME}/klipper_config/rome/hotends"
+ROME_SENSORS_DIR="${HOME}/klipper_config/rome/sensors"
 
 function stop_klipper {
     if [ "$(sudo systemctl list-units --full -all -t service --no-legend | grep -F "klipper.service")" ]; then
@@ -42,19 +50,103 @@ function create_rome_dir {
         echo -e "ERROR: ${KLIPPER_CONFIG_DIR} not found."
         exit 1
     fi
+    if [ -d "${ROME_DIR}" ]; then
+        echo "Creating rome base folder..."
+        mkdir "${ROME_BASE_DIR}"
+    else
+        echo -e "ERROR: ${ROME_DIR} not found."
+        exit 1
+    fi
+    if [ -d "${ROME_DIR}" ]; then
+        echo "Creating rome mmu folder..."
+        mkdir "${ROME_MMU_DIR}"
+    else
+        echo -e "ERROR: ${ROME_DIR} not found."
+        exit 1
+    fi
+    if [ -d "${ROME_DIR}" ]; then
+        echo "Creating rome feeder folder..."
+        mkdir "${ROME_FEEDER_DIR}"
+    else
+        echo -e "ERROR: ${ROME_DIR} not found."
+        exit 1
+    fi
+    if [ -d "${ROME_DIR}" ]; then
+        echo "Creating rome extruder folder..."
+        mkdir "${ROME_EXTRUDER_DIR}"
+    else
+        echo -e "ERROR: ${ROME_DIR} not found."
+        exit 1
+    fi
+    if [ -d "${ROME_DIR}" ]; then
+        echo "Creating rome hotends folder..."
+        mkdir "${ROME_HOTENDS_DIR}"
+    else
+        echo -e "ERROR: ${ROME_DIR} not found."
+        exit 1
+    fi
+    if [ -d "${ROME_DIR}" ]; then
+        echo "Creating rome sensors folder..."
+        mkdir "${ROME_SENSORS_DIR}"
+    else
+        echo -e "ERROR: ${ROME_DIR} not found."
+        exit 1
+    fi
 }
 
 function link_rome_macros {
     if [ -d "${KLIPPER_CONFIG_DIR}" ]; then
         if [ -d "${ROME_DIR}" ]; then
             echo "Linking macro files..."
-            ln -sf "${SRCDIR}/klipper_macro/config.cfg" "${ROME_DIR}/config.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/extruder_feeder.cfg" "${ROME_DIR}/extruder_feeder.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/extruder.cfg" "${ROME_DIR}/extruder.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/filament_sensor.cfg" "${ROME_DIR}/filament_sensor.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/mmu_splitter.cfg" "${ROME_DIR}/mmu_splitter.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/hardware.cfg" "${ROME_DIR}/hardware.cfg"
-            ln -sf "${SRCDIR}/klipper_macro/macros.cfg" "${ROME_DIR}/macros.cfg"
+
+            # Base
+            ln -sf "${SRCDIR}/klipper_macro/base/config.cfg" "${ROME_BASE_DIR}/config.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/base/macros.cfg" "${ROME_BASE_DIR}/macros.cfg"
+
+            # Extruder
+            ln -sf "${SRCDIR}/klipper_macro/extruder/base.cfg" "${ROME_EXTRUDER_DIR/}/base.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/extruder/orbiter_504.cfg" "${ROME_EXTRUDER_DIR/}/orbiter_504.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/extruder/orbiter_1004.cfg" "${ROME_EXTRUDER_DIR}/orbiter_1004.cfg"
+
+            # Feeder
+            ln -sf "${SRCDIR}/klipper_macro/feeder/feeder_1_orbiter_504.cfg" "${ROME_FEEDER_DIR/}/feeder_1_orbiter_504.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/feeder/feeder_1_orbiter_1004.cfg" "${ROME_FEEDER_DIR}/feeder_1_orbiter_1004.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/feeder/feeder_2_orbiter_504.cfg" "${ROME_FEEDER_DIR}/feeder_2_orbiter_504.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/feeder/feeder_2_orbiter_1004.cfg" "${ROME_FEEDER_DIR}/feeder_2_orbiter_1004.cfg"
+
+            # Sensors
+            ln -sf "${SRCDIR}/klipper_macro/sensors/y1.cfg" "${ROME_SENSORS_DIR}/y1.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/sensors/y2.cfg" "${ROME_SENSORS_DIR}/y2.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/sensors/toolhead.cfg" "${ROME_SENSORS_DIR}/toolhead.cfg"
+
+            # MMU Stepper
+            ln -sf "${SRCDIR}/klipper_macro/mmu/idler.cfg" "${ROME_MMU_DIR}/idler.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/mmu/pulley.cfg" "${ROME_MMU_DIR}/pulley.cfg"
+
+            # Hotends
+            ln -sf "${SRCDIR}/klipper_macro/hotends/chc_pro.cfg" "${ROME_HOTENDS_DIR}/chc_pro.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/hotends/rapido_hf.cfg" "${ROME_HOTENDS_DIR}/rapido_hf.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/hotends/rapido_uhf.cfg" "${ROME_HOTENDS_DIR}/rapido_uhf.cfg"
+
+        else
+            echo -e "ERROR: ${ROME_DIR} not found."
+            exit 1
+        fi
+    else
+        echo -e "ERROR: ${KLIPPER_CONFIG_DIR} not found."
+        exit 1
+    fi
+}
+
+function copy_rome_macros {
+    if [ -d "${KLIPPER_CONFIG_DIR}" ]; then
+        if [ -d "${ROME_DIR}" ]; then
+            echo "Copy macro files..."
+
+            # Configs
+            cp "${SRCDIR}/klipper_macro/mmu_splitter.cfg" "${ROME_DIR}/mmu_splitter.cfg"
+            cp "${SRCDIR}/klipper_macro/extruder_feeder.cfg" "${ROME_DIR}/extruder_feeder.cfg"
+
         else
             echo -e "ERROR: ${ROME_DIR} not found."
             exit 1
@@ -98,6 +190,7 @@ done
 stop_klipper
 create_rome_dir
 link_rome_macros
+copy_rome_macros
 link_rome_extras
 start_klipper
 

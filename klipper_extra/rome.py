@@ -1125,4 +1125,3 @@ class ROME:
 def load_config(config):
     return ROME(config)
 
-# SET_FILAMENT_SENSOR SENSOR=toolhead_filament_sensor ENABLE=0
