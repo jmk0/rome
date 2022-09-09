@@ -716,7 +716,7 @@ class ROME:
         if self.cmd_origin != "rome" or self.exchange_old_position == None or self.use_ooze_ex == 0:
             self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION PAUSE=3000')
         else:
-            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION PAUSE=0')
+            self.gcode.run_script_from_command('_UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION PAUSE=1')
             self.gcode.run_script_from_command('G0 X' + str(self.ooze_move_x) + ' F600')
 
         # success
