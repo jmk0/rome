@@ -129,6 +129,10 @@ class ROME:
         
         # load tool
         if not self.load_tool(tool, temp, True):
+
+            # send notification
+            self.gcode.run_script_from_command('_EXTRUDER_ERROR EXTRUDER=' + str(tool))
+
             self.pause_rome()
             return
         
@@ -409,6 +413,10 @@ class ROME:
         if self.Filament_Changes > 0:
             self.before_change()
             if not self.load_tool(tool + 1, -1, self.use_filament_caching):
+
+                # send notification
+                self.gcode.run_script_from_command('_EXTRUDER_ERROR EXTRUDER=' + str(tool))
+
                 return False
             self.after_change()
         self.Filament_Changes = self.Filament_Changes + 1
@@ -420,6 +428,9 @@ class ROME:
         logging.info("load_tool " + str(tool))
         self.respond("load_tool " + str(tool))
         
+        # send notification
+        self.gcode.run_script_from_command('_SELECT_EXTRUDER EXTRUDER=' + str(tool))
+
         # set hotend temperature
         if temp > 0:
             self.set_hotend_temperature(temp)
@@ -467,6 +478,10 @@ class ROME:
 
         # success
         self.respond("tool " + str(tool) + " loaded")
+
+        # send notification
+        self.gcode.run_script_from_command('_EXTRUDER_SELECTED EXTRUDER=' + str(tool))
+
         return True
 
     def unload_tool(self, new_filament, cache):
