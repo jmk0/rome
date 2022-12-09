@@ -1,6 +1,6 @@
 # Filament Sensors
 
-A simple but highly reliable filament sensor
+Simple but highly reliable filament sensors
 
 ## BOM
 - Micro Switch
