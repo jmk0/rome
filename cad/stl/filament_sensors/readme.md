@@ -15,4 +15,4 @@ Simple but highly reliable filament sensors
 - put the magnet via print in place in its pocket
 
 ## Post processing
-- make sure a filament cna pass the sensor without any friction
+- make sure a filament can pass the sensor without any friction
