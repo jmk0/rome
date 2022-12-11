@@ -185,150 +185,18 @@ Print Settings->multiple extruders
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower.jpg" alt="" width="584"/>
 
 
-# Hardware 
+# RatOS configuration
 
-## Primary Extruder
+## include predefined configurations
 
-ROME is by default configured to be used with Orbiter Extruders on an Octopus mainboard. In case you want to use other extruders or mainboard you can override these sections in your printer.cfg
+In the user overrides section in RatOS, include the configuration file that fits your setup
 
 ```ini
-# -------------------------------------										
-# Toolhead Extruder 
-# Orbiter 2.0 
-# -------------------------------------	
-[extruder]
-max_extrude_only_velocity: 100
-max_extrude_only_accel: 1000
-max_extrude_only_distance: 400
-max_extrude_cross_section: 999999
+[include rome/mmu_splitter.cfg]         # MMU splitter device
 ```
 
-## Secondary Extruders
-
-You can add as many secondary extruders as you want.
-
-Make sure they follow this pattern `rome_extruder_1`, `rome_extruder_2`, ....
+or
 
 ```ini
-# -------------------------------------										
-# Rome Extruder 1
-# Orbiter 1.5 on Octopus Board Driver 3
-# -------------------------------------										
-[extruder_stepper rome_extruder_1]
-extruder:
-step_pin: PG4
-dir_pin: !PC1
-enable_pin: !PA0
-microsteps: 64
-rotation_distance: 4.63
-full_steps_per_rotation: 200
-
-[tmc2209 extruder_stepper rome_extruder_1]
-uart_pin: PC7
-stealthchop_threshold: 0
-interpolate: False
-driver_TBL: 1
-driver_TOFF: 3
-driver_HEND: 9
-driver_HSTRT: 7
-
-# -------------------------------------										
-# Rome Extruder 2
-# Orbiter 1.5 on Octopus Board Driver 4
-# -------------------------------------										
-[extruder_stepper rome_extruder_2]
-extruder:
-step_pin: PF9
-dir_pin: !PF10
-enable_pin: !PG2
-microsteps: 64
-rotation_distance: 4.63
-full_steps_per_rotation: 200
-
-[tmc2209 extruder_stepper rome_extruder_2]
-uart_pin: PF2
-stealthchop_threshold: 0
-interpolate: False
-driver_TBL: 1
-driver_TOFF: 3
-driver_HEND: 9
-driver_HSTRT: 7
-```
-
-## Filament Sensor
-
-You can use any type of sensor, just make sure to name it `toolhead_filament_sensor`
-
-```ini
-[filament_switch_sensor toolhead_filament_sensor]
-pause_on_runout: False
-event_delay: 0.1
-pause_delay: 0.1
-switch_pin: ^!PG15
-insert_gcode:
-  ROME_INSERT_GCODE
-runout_gcode:
-  ROME_RUNOUT_GCODE
-```
-
-# Configuration
-
-```ini
-# -------------------------------------										
-#  ROME CONFIGURATION
-# -------------------------------------										
-[rome]
-rome_setup: 1                                   # 0 = extruder feeder
-                                                # 1 = mmu splitter
-
-tool_count: 2                                   # number of tools
-
-heater_timeout: 600                             # Heater Timeout in case of rome paused the print
-
-unload_filament_after_print: 1                  # 1 = unloads filament after a printing
-                                                # 0 = filament stays in hotend
-
-wipe_tower_acceleration: 25000                  # printer acceleration when printing the wipe tower
-
-use_ooze_ex: 1                                  # 1 = rome distributes oozed material over the length of the wipe tower
-                                                # 0 = try your luck 
-
-nozzle_loading_speed_mms: 10                    # extruder speed when moving the filament between the parking position and the nozzle 
-filament_homing_speed_mms: 75                   # extruder speed when moving the filament inside bowden tube
-filament_parking_speed_mms: 50                  # extruder speed when moving the filament between the filament sensor and the parking position
-
-toolhead_sensor_to_bowden_cache_mm: 780         # distance between the filament sensor and the filament caching position
-toolhead_sensor_to_bowden_parking_mm: 780       # distance between the filament sensor and the filament parking position
-toolhead_sensor_to_extruder_gear_mm: 45         # distance between the filament sensor and the extruder gears
-extruder_gear_to_parking_position_mm: 40        # distance between the extruder gears and the parking position
-parking_position_to_nozzle_mm: 35               # distance between the parking position and the nozzle
-```
-
-# Unload
-
-By default ROME is configured for a Rapido UHF and PETG. If you have another combination, just override this macro so that it fits your needs.
-
-```ini
-# -------------------------------------										
-# Unload from nozzle to parking position
-# Rapido UHF
-# Prusament PETG @ 250°
-# -------------------------------------										
-[gcode_macro _UNLOAD_FROM_NOZZLE_TO_PARKING_POSITION]
-variable_parameter_PAUSE : 3000
-gcode:
-  # initial retract
-  G92 E0
-  G0 E-25 F3600
-  G4 P500
-  # remove string
-  G92 E0
-  G0 E20 F3600
-  G4 P100
-  # move to parking position, the center of the ptfe tube that goes to your hotend
-  G92 E0
-  G0 E-35 F3600
-  G4 P{params.PAUSE|default(3000)|int}
-  # wait for movements
-  M400
+[include rome/extruder_feeder.cfg]      # multi extruder to direct extruder setup
 ```
