@@ -18,9 +18,9 @@ High speed multi material printing with as many extruders as you want
 - [Configuration](#configuration)
 
 ## Printed Parts
-  - [Filament Sensor](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_inline_filament_sensor)
-  - [Y-Junction](https://github.com/HelgeKeck/rome/tree/main/cad/stl/ptfe_tube_y_junction)
-  - [Double Spool Holder](https://github.com/HelgeKeck/rome/tree/main/cad/stl/spool_holder)
+  - [Filament Sensor](https://github.com/HelgeKeck/rome/tree/main/cad/stl/filament_sensors)
+  - [MMU Splitter](https://github.com/HelgeKeck/rome/tree/main/cad/stl/mmu_splitter)
+  - [Orbiter Mounts](https://github.com/HelgeKeck/rome/tree/main/cad/stl/orbiter_mounts)
 
 # Intro
 
