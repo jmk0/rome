@@ -189,7 +189,8 @@ Print Settings->multiple extruders
 
 ## include predefined configurations
 
-In the user overrides section in RatOS, include the configuration file that fits your setup
+In the user overrides section in RatOS, include the configuration file that fits your setup.
+Please make all changes and overrides inside in one of these files, there is no need to do that in your printer.cfg
 
 ```ini
 [include rome/mmu_splitter.cfg]         # MMU splitter device
