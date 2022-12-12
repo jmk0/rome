@@ -9,6 +9,7 @@ Simple but highly reliable filament sensors
 - 2 x M2 screws 
 - 2 x M2 nuts
 - 2 x PTFE tube fittings
+- small PTFE tube piece between sensor and extruder
 
 ## Printing
 - print with 0.1mm layer height
