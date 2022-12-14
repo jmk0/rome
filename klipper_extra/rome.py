@@ -17,6 +17,7 @@ class ROME:
         self.toolhead_filament_sensor = self.printer.lookup_object("filament_switch_sensor toolhead_filament_sensor")
         self.y1_filament_sensor = None
         self.y2_filament_sensor = None
+        self.z_filament_sensor = None
 
         self.load_settings()
         self.register_commands()
@@ -82,6 +83,8 @@ class ROME:
                 self.y1_filament_sensor = filament_sensor[1]
             if sensor_name == 'y2_filament_sensor':
                 self.y2_filament_sensor = filament_sensor[1]
+            if sensor_name == 'z_filament_sensor':
+                self.z_filament_sensor = filament_sensor[1]
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Heater Timeout Handler
@@ -117,6 +120,7 @@ class ROME:
         self.gcode.register_command('ROME_INSERT_GCODE', self.cmd_ROME_INSERT_GCODE, desc=("ROME_INSERT_GCODE"))
         self.gcode.register_command('ROME_RUNOUT_GCODE', self.cmd_ROME_RUNOUT_GCODE, desc=("ROME_RUNOUT_GCODE"))
         self.gcode.register_command('LOAD_FILAMENTS', self.cmd_LOAD_FILAMENTS, desc=("LOAD_FILAMENTS"))
+        self.gcode.register_command('Z_HOME_TEST', self.cmd_Z_HOME_TEST, desc=("Z_HOME_TEST"))
 
     def cmd_SELECT_TOOL(self, param):
         tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
@@ -215,6 +219,14 @@ class ROME:
         self.runout_gcode()
 
     def cmd_LOAD_FILAMENTS(self, param):
+        if not self.Homed:
+            if not self.home():
+                return False
+        if not self.home_filaments():
+            return False
+        return True
+
+    def cmd_Z_HOME_TEST(self, param):
         if not self.Homed:
             if not self.home():
                 return False

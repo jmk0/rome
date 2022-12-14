@@ -100,6 +100,7 @@ function link_rome_macros {
             echo "Linking macro files..."
 
             # Base
+            ln -sf "${SRCDIR}/klipper_macro/base/config.cfg" "${ROME_BASE_DIR}/config.cfg"
             ln -sf "${SRCDIR}/klipper_macro/base/macros.cfg" "${ROME_BASE_DIR}/macros.cfg"
 
             # Extruder
