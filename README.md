@@ -63,6 +63,22 @@ git clone https://github.com/HelgeKeck/rome.git
 bash ~/rome/install.sh
 ```
 
+## RatOS
+
+In the user overrides section in RatOS, include the configuration file that fits your setup.
+
+```ini
+[include rome/mmu_splitter.cfg]         # MMU splitter device
+```
+
+or
+
+```ini
+[include rome/extruder_feeder.cfg]      # multi extruder to direct extruder setup
+```
+
+Please make all changes and overrides inside in one of these files, there is no need to do that in your printer.cfg
+
 ## Moonraker
 ```ini
 [update_manager rome]
@@ -70,15 +86,6 @@ type: git_repo
 primary_branch: main
 path: ~/rome
 origin: https://github.com/HelgeKeck/rome.git
-```
-
-## RatOS
-
-Add this to the users overrides section in your printer.cfg
-
-```ini
-# ROME
-[include rome/config.cfg]
 ```
 
 # Slicer 
@@ -183,22 +190,3 @@ Filament Settings->Multimaterial
 Print Settings->multiple extruders
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower.jpg" alt="" width="584"/>
-
-
-# RatOS configuration
-
-## include predefined configurations
-
-In the user overrides section in RatOS, include the configuration file that fits your setup.
-
-```ini
-[include rome/mmu_splitter.cfg]         # MMU splitter device
-```
-
-or
-
-```ini
-[include rome/extruder_feeder.cfg]      # multi extruder to direct extruder setup
-```
-
-Please make all changes and overrides inside in one of these files, there is no need to do that in your printer.cfg
