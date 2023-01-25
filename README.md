@@ -155,13 +155,6 @@ Printer Settings->Single extruder MM setup
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
 
 
-**Dectivate advanced wiping volume**
-
-Printer Settings->General
-
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
-
-
 **Dectivate toolchange temperature**
 
 Filament Settings->Multimaterial
