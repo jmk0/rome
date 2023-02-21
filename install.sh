@@ -175,6 +175,11 @@ function copy_rome_macros {
             cp "${SRCDIR}/klipper_macro/mmu_splitter.cfg" "${ROME_DIR}/mmu_splitter.cfg"
             cp "${SRCDIR}/klipper_macro/extruder_feeder.cfg" "${ROME_DIR}/extruder_feeder.cfg"
 
+            if [ -f "${KLIPPER_CONFIG_DIR}/rome.cfg" ]; then
+                echo "skipping rome.cfg..."
+            else
+                cp "${SRCDIR}/klipper_macro/rome.cfg" "${KLIPPER_CONFIG_DIR}/rome.cfg"
+            fi
         else
             echo -e "ERROR: ${ROME_DIR} not found."
             exit 1
