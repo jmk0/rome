@@ -15,6 +15,8 @@ class ROME:
         self.reactor = self.printer.get_reactor()
         self.gcode = self.printer.lookup_object('gcode')
         self.toolhead_filament_sensor = self.printer.lookup_object("filament_switch_sensor toolhead_filament_sensor")
+        self.f1_filament_sensor = None
+        self.f2_filament_sensor = None
         self.y1_filament_sensor = None
         self.y2_filament_sensor = None
         self.z_filament_sensor = None
@@ -79,6 +81,10 @@ class ROME:
 
         for filament_sensor in self.printer.lookup_objects('filament_switch_sensor'):
             sensor_name = filament_sensor[1].runout_helper.name
+            if sensor_name == 'feeder_1_filament_sensor':
+                self.f1_filament_sensor = filament_sensor[1]
+            if sensor_name == 'feeder_2_filament_sensor':
+                self.f2_filament_sensor = filament_sensor[1]
             if sensor_name == 'y1_filament_sensor':
                 self.y1_filament_sensor = filament_sensor[1]
             if sensor_name == 'y2_filament_sensor':
@@ -114,6 +120,7 @@ class ROME:
         self.gcode.register_command('LOAD_TOOL', self.cmd_LOAD_TOOL, desc=("LOAD_TOOL"))
         self.gcode.register_command('SELECT_TOOL', self.cmd_SELECT_TOOL, desc=("SELECT_TOOL"))
         self.gcode.register_command('UNLOAD_TOOL', self.cmd_UNLOAD_TOOL, desc=("UNLOAD_TOOL"))
+        self.gcode.register_command('EJECT_TOOL', self.cmd_EJECT_TOOL, desc=("EJECT_TOOL"))
         self.gcode.register_command('CHANGE_TOOL', self.cmd_CHANGE_TOOL, desc=("CHANGE_TOOL"))
         self.gcode.register_command('ROME_END_PRINT', self.cmd_ROME_END_PRINT, desc=("ROME_END_PRINT"))
         self.gcode.register_command('ROME_START_PRINT', self.cmd_ROME_START_PRINT, desc=("ROME_START_PRINT"))
@@ -121,6 +128,8 @@ class ROME:
         self.gcode.register_command('ROME_RUNOUT_GCODE', self.cmd_ROME_RUNOUT_GCODE, desc=("ROME_RUNOUT_GCODE"))
         self.gcode.register_command('LOAD_FILAMENTS', self.cmd_LOAD_FILAMENTS, desc=("LOAD_FILAMENTS"))
         self.gcode.register_command('Z_HOME_TEST', self.cmd_Z_HOME_TEST, desc=("Z_HOME_TEST"))
+        self.gcode.register_command('F_RUNOUT', self.cmd_F_RUNOUT, desc=("F_RUNOUT"))
+        self.gcode.register_command('F_INSERT', self.cmd_F_INSERT, desc=("F_INSERT"))
 
     def cmd_SELECT_TOOL(self, param):
         tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
@@ -132,6 +141,7 @@ class ROME:
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         
         # load tool
+        self.respond("Y 1")
         if not self.load_tool(tool, temp, True):
 
             # send notification
@@ -155,6 +165,10 @@ class ROME:
         self.Selected_Filament = tool
         if self.toolhead_filament_sensor_triggered():
             self.unload_tool(-1, False)
+
+    def cmd_EJECT_TOOL(self, param):
+        tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
+        self.eject_filament(tool)
 
     def cmd_HOME_ROME(self, param):
         self.Homed = False
@@ -232,6 +246,16 @@ class ROME:
                 return False
         if not self.home_filaments():
             return False
+        return True
+
+    def cmd_F_INSERT(self, param):
+        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
+        self.autoload_filament(tool)
+        return True
+
+    def cmd_F_RUNOUT(self, param):
+        tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
+        self.filament_runout(tool)
         return True
 
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -403,6 +427,64 @@ class ROME:
         return True
 
     # -----------------------------------------------------------------------------------------------------------------------------
+    # Autoload
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+    def autoload_filament(self, tool):
+        logging.info("auto loading filament " + str(tool))
+        self.respond("auto loading filament " + str(tool))
+
+        # check hotend temperature
+        if not self.extruder_can_extrude():
+            self.respond("Hotend too cold!")
+            return False
+
+        if self.rome_setup == 0:
+            # select filament
+            self.select_tool(tool)
+
+            # autoload filament
+            self.gcode.run_script_from_command('G92 E0')
+            self.gcode.run_script_from_command('G0 E50 F1000')
+            self.gcode.run_script_from_command('G92 E0')
+            self.gcode.run_script_from_command('G0 E' + str(self.toolhead_sensor_to_bowden_parking_mm - 50) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('M400')
+
+            # success
+            return True
+
+        return False
+
+    def eject_filament(self, tool):
+        logging.info("eject filament " + str(tool))
+        self.respond("eject filament " + str(tool))
+
+        # check hotend temperature
+        if not self.extruder_can_extrude():
+            self.respond("Hotend too cold!")
+            return False
+
+        if self.rome_setup == 0:
+            # select filament
+            self.select_tool(tool)
+
+            # eject filament
+            self.gcode.run_script_from_command('G92 E0')
+            self.gcode.run_script_from_command('G0 E-' + str(self.toolhead_sensor_to_bowden_parking_mm + 100) + ' F' + str(self.filament_homing_speed_mms * 60))
+            self.gcode.run_script_from_command('M400')
+
+            # success
+            return True
+
+        # failed
+        return False
+
+    def filament_runout(self, tool):
+        logging.info("runout detected filament " + str(tool))
+        self.respond("runout detected filament " + str(tool))
+        return True 
+
+    # -----------------------------------------------------------------------------------------------------------------------------
     # Change Tool
     # -----------------------------------------------------------------------------------------------------------------------------
     mode = "native"
@@ -446,6 +528,7 @@ class ROME:
 
         # set hotend temperature
         if temp > 0:
+            self.respond("A 2b")
             self.set_hotend_temperature(temp)
 
         # home if not homed yet
@@ -621,6 +704,8 @@ class ROME:
 
         # set load distance
         load_distance = self.toolhead_sensor_to_bowden_parking_mm
+        if self.rome_setup == 0:
+            load_distance = self.toolhead_sensor_to_bowden_cache_mm
 
         # filament caching
         is_cached = False
@@ -777,6 +862,8 @@ class ROME:
 
         # set unload distance
         unload_distance = self.toolhead_sensor_to_bowden_parking_mm
+        if self.rome_setup == 0:
+            unload_distance = self.toolhead_sensor_to_bowden_cache_mm
 
         # filament caching
         is_cached = False

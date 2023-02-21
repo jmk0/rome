@@ -117,6 +117,8 @@ function link_rome_macros {
             # Sensors
             ln -sf "${SRCDIR}/klipper_macro/sensors/y1.cfg" "${ROME_SENSORS_DIR}/y1.cfg"
             ln -sf "${SRCDIR}/klipper_macro/sensors/y2.cfg" "${ROME_SENSORS_DIR}/y2.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/sensors/f1.cfg" "${ROME_SENSORS_DIR}/f1.cfg"
+            ln -sf "${SRCDIR}/klipper_macro/sensors/f2.cfg" "${ROME_SENSORS_DIR}/f2.cfg"
             ln -sf "${SRCDIR}/klipper_macro/sensors/toolhead.cfg" "${ROME_SENSORS_DIR}/toolhead.cfg"
 
             # MMU Stepper
