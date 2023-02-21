@@ -65,7 +65,7 @@ bash ~/rome/install.sh
 
 ## RatOS
 
-In the user overrides section in RatOS, include the configuration file that fits your setup.
+In the user overrides section in RatOS, include the base configuration file. 
 
 ```ini
 [include rome.cfg]      
@@ -80,6 +80,7 @@ type: git_repo
 primary_branch: main
 path: ~/rome
 origin: https://github.com/HelgeKeck/rome.git
+install_script: install.sh
 ```
 
 # Slicer 
