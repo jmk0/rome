@@ -6,7 +6,7 @@
 - 1 x 5mm x 2mm N45 permanent round magnet
 - 2 x M2x12mm screws 
 - 2 x M2 hex nuts
-- 1 x M6 PTFE fitting
+- 1 x M6 PTFE fitting (you can use the one from the orbiter)
 
 ## Printing
 - 0.2mm first layer height
