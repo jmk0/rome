@@ -39,15 +39,15 @@ function get_ratos_version {
             exit 1
         fi
     fi
-    KLIPPER_CONFIG_MMU_DIR="${CONFIG_DIR}/mmu"
-    KLIPPER_CONFIG_FEEDER_DIR="${CONFIG_DIR}/feeder"
-    ROME_DIR="${CONFIG_DIR}/rome"
-    ROME_BASE_DIR="${CONFIG_DIR}/rome/base"
-    ROME_MMU_DIR="${CONFIG_DIR}/rome/mmu"
-    ROME_FEEDER_DIR="${CONFIG_DIR}/rome/feeder"
-    ROME_EXTRUDER_DIR="${CONFIG_DIR}/rome/extruder"
-    ROME_HOTENDS_DIR="${CONFIG_DIR}/rome/hotends"
-    ROME_SENSORS_DIR="${CONFIG_DIR}/rome/sensors"
+    KLIPPER_CONFIG_MMU_DIR="${KLIPPER_CONFIG_DIR}/mmu"
+    KLIPPER_CONFIG_FEEDER_DIR="${KLIPPER_CONFIG_DIR}/feeder"
+    ROME_DIR="${KLIPPER_CONFIG_DIR}/rome"
+    ROME_BASE_DIR="${KLIPPER_CONFIG_DIR}/rome/base"
+    ROME_MMU_DIR="${KLIPPER_CONFIG_DIR}/rome/mmu"
+    ROME_FEEDER_DIR="${KLIPPER_CONFIG_DIR}/rome/feeder"
+    ROME_EXTRUDER_DIR="${KLIPPER_CONFIG_DIR}/rome/extruder"
+    ROME_HOTENDS_DIR="${KLIPPER_CONFIG_DIR}/rome/hotends"
+    ROME_SENSORS_DIR="${KLIPPER_CONFIG_DIR}/rome/sensors"
 }
 
 function stop_klipper {
