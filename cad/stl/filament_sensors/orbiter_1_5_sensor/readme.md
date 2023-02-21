@@ -1,6 +1,6 @@
 # Orbiter 1.5 Filament Sensor
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/orbiter_15_sensor.jpg" alt="" width="640"/>
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/orbiter_15_sensor.jpg" alt="" width="480"/>
 
 ## BOM
 - 1 x Micro Switch
