@@ -20,5 +20,6 @@
 
 ## Post processing
 - clean the filament path
+- make sure the small round adapter part is clean and fits freely into the orbiter, dont force it in 
 - the micro switch orientation matters, make sure the lever points to the small lever pocket
 - make sure the sensor works, you can move it slightly to support more types of switches
