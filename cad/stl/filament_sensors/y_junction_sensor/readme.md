@@ -18,5 +18,5 @@
 - clean the filament path
 
 ## Download
-[Y Junction Sensor Collets](/Y Junction Sensor Collets.stl)
-[Y Junction Sensor Fittings](/Y Junction Sensor Fittings.stl)
+Y Junction Sensor Collets [download](/Y Junction Sensor Collets.stl)
+Y Junction Sensor Fittings [download](/Y Junction Sensor Fittings.stl)
