@@ -16,6 +16,3 @@
 
 ## Post processing
 - remove sacrificial layer and clean the filament path
-
-## Download
-[Orbiter 1.5 Sensor Fitting](/Orbiter 1.5 Sensor Fitting.stl)

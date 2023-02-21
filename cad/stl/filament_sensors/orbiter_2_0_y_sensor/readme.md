@@ -20,7 +20,3 @@
 
 ## Post processing
 - clean the filament path
-
-## Download
-[Orbiter 2.0 Y Sensor Collets](/Orbiter 2.0 Y Sensor Collets.stl)
-[Orbiter 2.0 Y Sensor Fittings](/Orbiter 2.0 Y Sensor Fittings.stl)

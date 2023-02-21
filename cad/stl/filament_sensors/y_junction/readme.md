@@ -10,7 +10,3 @@
 
 ## Post processing
 - clean the filament path
-
-## Download
-[Y Junction Collets](/Y Junction Collets.stl)
-[Y Junction Fittings](/Y Junction Fittings.stl)
