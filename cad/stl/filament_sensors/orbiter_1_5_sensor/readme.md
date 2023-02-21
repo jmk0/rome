@@ -16,3 +16,4 @@
 
 ## Post processing
 - remove sacrificial layer and clean the filament path
+- make sure the sensor works, you can move it slightly to support more types of switches

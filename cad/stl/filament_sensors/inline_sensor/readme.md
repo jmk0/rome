@@ -16,6 +16,7 @@
 
 ## Post processing
 - clean the filament path
+- make sure the sensor works, you can move it slightly to support more types of switches
 
 ## Download
 [Inline Sensor Arrow](/Inline Sensor Arrow.stl)
