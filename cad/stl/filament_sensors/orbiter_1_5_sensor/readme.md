@@ -12,6 +12,7 @@
 
 ## Printing
 - arachne
+- 4 perimeter
 - 0.2mm first layer height
 - 0.1mm base layer height
 - part is already in the correct orientation
