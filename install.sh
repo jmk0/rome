@@ -12,17 +12,43 @@ set -e
 SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/ && pwd )"
 
 # Default Parameters
-KLIPPER_CONFIG_DIR="${HOME}/klipper_config"
-KLIPPER_CONFIG_MMU_DIR="${HOME}/klipper_config/mmu"
-KLIPPER_CONFIG_FEEDER_DIR="${HOME}/klipper_config/feeder"
+KLIPPER_CONFIG_DIR=""
+KLIPPER_CONFIG_MMU_DIR=""
+KLIPPER_CONFIG_FEEDER_DIR=""
+ROME_DIR=""
+ROME_BASE_DIR=""
+ROME_MMU_DIR=""
+ROME_FEEDER_DIR=""
+ROME_EXTRUDER_DIR=""
+ROME_HOTENDS_DIR=""
+ROME_SENSORS_DIR=""
 KLIPPY_EXTRAS="${HOME}/klipper/klippy/extras"
-ROME_DIR="${HOME}/klipper_config/rome"
-ROME_BASE_DIR="${HOME}/klipper_config/rome/base"
-ROME_MMU_DIR="${HOME}/klipper_config/rome/mmu"
-ROME_FEEDER_DIR="${HOME}/klipper_config/rome/feeder"
-ROME_EXTRUDER_DIR="${HOME}/klipper_config/rome/extruder"
-ROME_HOTENDS_DIR="${HOME}/klipper_config/rome/hotends"
-ROME_SENSORS_DIR="${HOME}/klipper_config/rome/sensors"
+RATOS_V1_CONFIG_DIR="${HOME}/klipper_config"
+RATOS_V2_CONFIG_DIR="${HOME}/printer_data/config"
+
+function get_ratos_version {
+    if [ -d "${RATOS_V1_CONFIG_DIR}" ]; then
+        echo -e "RatOS Version 1.x"
+        KLIPPER_CONFIG_DIR="${RATOS_V1_CONFIG_DIR}"
+    else
+        if [ -d "${RATOS_V2_CONFIG_DIR}" ]; then
+            echo -e "RatOS Version 2.x"
+            KLIPPER_CONFIG_DIR="${RATOS_V2_CONFIG_DIR}"
+        else
+            echo -e "ERROR: No RatOS config folder found."
+            exit 1
+        fi
+    fi
+    KLIPPER_CONFIG_MMU_DIR="${CONFIG_DIR}/mmu"
+    KLIPPER_CONFIG_FEEDER_DIR="${CONFIG_DIR}/feeder"
+    ROME_DIR="${HOME}/rome"
+    ROME_BASE_DIR="${HOME}/rome/base"
+    ROME_MMU_DIR="${HOME}/rome/mmu"
+    ROME_FEEDER_DIR="${HOME}/rome/feeder"
+    ROME_EXTRUDER_DIR="${HOME}/rome/extruder"
+    ROME_HOTENDS_DIR="${HOME}/rome/hotends"
+    ROME_SENSORS_DIR="${HOME}/rome/sensors"
+}
 
 function stop_klipper {
     if [ "$(sudo systemctl list-units --full -all -t service --no-legend | grep -F "klipper.service")" ]; then
@@ -189,6 +215,7 @@ while getopts "c:h" arg; do
 done
 
 # Run steps
+get_ratos_version
 stop_klipper
 create_rome_dir
 link_rome_macros
