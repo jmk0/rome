@@ -9,6 +9,7 @@
 - 1 x M6 PTFE fitting (you can use the one from the orbiter)
 
 ## Printing
+- arachne
 - 0.2mm first layer height
 - 0.1mm base layer height
 - part is already in the correct orientation
