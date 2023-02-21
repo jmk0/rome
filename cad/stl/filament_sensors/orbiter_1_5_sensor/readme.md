@@ -1,5 +1,7 @@
 # Orbiter 1.5 Filament Sensor
 
+<img src="https://github.com/HelgeKeck/rome/blob/main/img/orbiter_15_sensor.jpg" alt="" width="800"/>
+
 ## BOM
 - 1 x Micro Switch
 - 1 x 6mm magnetic steel ball
