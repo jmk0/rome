@@ -71,7 +71,7 @@ In the user overrides section in RatOS, include the base configuration file.
 [include rome.cfg]      
 ```
 
-Please make all changes and overrides inside in one of these files, there is no need to do that in your printer.cfg
+Please make all changes and overrides in this file, there is no need to do that in your printer.cfg
 
 ## Moonraker
 ```ini
