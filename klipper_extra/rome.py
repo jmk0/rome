@@ -256,12 +256,12 @@ class ROME:
     def cmd_F_INSERT(self, param):
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
         if self.filament_insert(tool):
-            self.gcode.run_script_from_command('_AUTOLOAD_RESUME_AFTER_INSERT')
+            self.gcode.run_script_from_command('_AUTOLOAD_RESUME_AFTER_INSERT TOOL=' + str(tool))
 
     def cmd_F_RUNOUT(self, param):
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
         if self.filament_runout(tool):
-            self.gcode.run_script_from_command('_INFINITE_RESUME_AFTER_SWAP')
+            self.gcode.run_script_from_command('_INFINITE_RESUME_AFTER_SWAP TOOL=' + str(tool))
 
     def cmd_SET_INFINITE_SPOOL(self, param):
         self.infinite_spool = not self.infinite_spool
