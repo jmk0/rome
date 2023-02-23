@@ -41,6 +41,9 @@ class ROME:
         self.wipe_tower_acceleration = self.config.getfloat('wipe_tower_acceleration', 5000.0)
         self.use_ooze_ex = self.config.getfloat('use_ooze_ex', 1)
 
+        self.runout_detected = False
+        self.infinite_spool = False
+
         if self.config.getfloat('use_filament_caching', 1) == 1:
             self.use_filament_caching = True
         else:
@@ -130,6 +133,7 @@ class ROME:
         self.gcode.register_command('Z_HOME_TEST', self.cmd_Z_HOME_TEST, desc=("Z_HOME_TEST"))
         self.gcode.register_command('F_RUNOUT', self.cmd_F_RUNOUT, desc=("F_RUNOUT"))
         self.gcode.register_command('F_INSERT', self.cmd_F_INSERT, desc=("F_INSERT"))
+        self.gcode.register_command('_SET_INFINITE_SPOOL', self.cmd_SET_INFINITE_SPOOL, desc=("SET_INFINITE_SPOOL"))
 
     def cmd_SELECT_TOOL(self, param):
         tool = param.get_int('TOOL', None, minval=-1, maxval=self.tool_count)
@@ -141,7 +145,6 @@ class ROME:
         temp = param.get_int('TEMP', None, minval=-1, maxval=self.heater.max_temp)
         
         # load tool
-        self.respond("Y 1")
         if not self.load_tool(tool, temp, True):
 
             # send notification
@@ -182,6 +185,7 @@ class ROME:
 
     def cmd_ROME_END_PRINT(self, param):
         self.cmd_origin = "gcode"
+        self.infinite_spool = False
         self.gcode.run_script_from_command("END_PRINT")
         if self.unload_filament_after_print == 1:
             if self.toolhead_filament_sensor_triggered():
@@ -194,6 +198,7 @@ class ROME:
     def cmd_ROME_START_PRINT(self, param):
         self.cmd_origin = "rome"
         self.mode = "native"
+        self.infinite_spool = False
         self.Filament_Changes = 0
         self.exchange_old_position = None
 
@@ -250,13 +255,17 @@ class ROME:
 
     def cmd_F_INSERT(self, param):
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
-        self.autoload_filament(tool)
-        return True
+        if self.filament_insert(tool):
+            self.gcode.run_script_from_command('_AUTOLOAD_RESUME_AFTER_INSERT')
 
     def cmd_F_RUNOUT(self, param):
         tool = param.get_int('TOOL', None, minval=0, maxval=self.tool_count)
-        self.filament_runout(tool)
-        return True
+        if self.filament_runout(tool):
+            self.gcode.run_script_from_command('_INFINITE_RESUME_AFTER_SWAP')
+
+    def cmd_SET_INFINITE_SPOOL(self, param):
+        self.infinite_spool = not self.infinite_spool
+        self.respond("Infinite Spool: " + str(self.infinite_spool))
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Home
@@ -430,29 +439,41 @@ class ROME:
     # Autoload
     # -----------------------------------------------------------------------------------------------------------------------------
 
-    def autoload_filament(self, tool):
+    def filament_insert(self, tool):
         logging.info("auto loading filament " + str(tool))
         self.respond("auto loading filament " + str(tool))
 
-        # check hotend temperature
-        if not self.extruder_can_extrude():
-            self.respond("Hotend too cold!")
-            return False
-
         if self.rome_setup == 0:
+
+            # check hotend temperature
+            if not self.extruder_can_extrude():
+                self.respond("Hotend too cold!")
+                self.respond("Heating up nozzle to " + str(self.heater.min_extrude_temp))
+                self.extruder_set_temperature(self.heater.min_extrude_temp, True)
+
             # select filament
             self.select_tool(tool)
 
-            # autoload filament
+            # move filament to the caching position
             self.gcode.run_script_from_command('G92 E0')
             self.gcode.run_script_from_command('G0 E50 F1000')
             self.gcode.run_script_from_command('G92 E0')
             self.gcode.run_script_from_command('G0 E' + str(self.toolhead_sensor_to_bowden_parking_mm - 50) + ' F' + str(self.filament_homing_speed_mms * 60))
             self.gcode.run_script_from_command('M400')
 
-            # success
-            return True
+            # load filament to nozzle
+            if self.runout_detected == True:
+                self.runout_detected = False
+                self.cmd_origin = "gcode"
 
+                # load tool
+                if not self.load_tool(tool, -1, True):
+                    # send notification
+                    self.gcode.run_script_from_command('_EXTRUDER_ERROR EXTRUDER=' + str(tool))
+                    self.respond("Autoload failed, please insert filament " + str(tool) + " and resume the print.")
+                    return False
+
+                return True
         return False
 
     def eject_filament(self, tool):
@@ -462,7 +483,8 @@ class ROME:
         # check hotend temperature
         if not self.extruder_can_extrude():
             self.respond("Hotend too cold!")
-            return False
+            self.respond("Heating up nozzle to " + str(self.heater.min_extrude_temp))
+            self.extruder_set_temperature(self.heater.min_extrude_temp, True)
 
         if self.rome_setup == 0:
             # select filament
@@ -476,13 +498,40 @@ class ROME:
             # success
             return True
 
-        # failed
         return False
 
     def filament_runout(self, tool):
         logging.info("runout detected filament " + str(tool))
         self.respond("runout detected filament " + str(tool))
-        return True 
+
+        # unload tool
+        if self.Selected_Filament == tool:
+            self.runout_detected = True
+
+            if not self.unload_tool(-1, False):
+                self.respond("could not unload tool!")
+                return False
+
+            self.eject_filament(tool)
+        
+        if self.infinite_spool == True:
+
+            if tool == 1:
+                tool = 2
+            elif tool == 2:
+                tool = 1
+        
+            self.select_tool(tool)
+
+            # load tool
+            if not self.load_tool(tool, -1, True):
+                # send notification
+                self.gcode.run_script_from_command('_EXTRUDER_ERROR EXTRUDER=' + str(tool))
+                self.respond("Autload failed, please insert filament " + str(tool) + " and resume the print.")
+                return False
+
+            return True
+        return False
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # Change Tool
@@ -528,7 +577,6 @@ class ROME:
 
         # set hotend temperature
         if temp > 0:
-            self.respond("A 2b")
             self.set_hotend_temperature(temp)
 
         # home if not homed yet
