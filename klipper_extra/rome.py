@@ -664,6 +664,9 @@ class ROME:
     def after_change(self):
         self.disable_toolhead_filament_sensor()
 
+        # send notification
+        self.gcode.run_script_from_command('_CONTINUE_PRINTING EXTRUDER=' + str(self.Selected_Filament))
+
     # -----------------------------------------------------------------------------------------------------------------------------
     # Rome Native
     # -----------------------------------------------------------------------------------------------------------------------------
