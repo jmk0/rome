@@ -3,8 +3,6 @@ RatOS Multi Extruder
 
 A multi extruder to direct extruder solution for RatOS
 
-High speed multi material printing with as many extruders as you want
-
 ## Table of Content
 - [Intro](#intro)
 - [Installation](#installation)
@@ -24,13 +22,7 @@ High speed multi material printing with as many extruders as you want
 
 # Intro
 
-I own a MMU and i like it, but i realized that 99% of my multimaterial prints are just two colors, or even less :-)
-
-I had two spare extruders in my drawer and thought this could be an interesting project.
-
-In case you have a octopus board, the additional extruders can be plugged into the free slots, no additional mcu needed.
-
-ROME is MUCH faster then any regular MMU or ERCF setup. The whole filament unloading and loading process is multiple times faster, not only because ROME just has to park the filament behind the y-junction. In its native mode, ROME handles the loading and unloading process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
+ROME is MUCH faster then any regular MMU, ERCF or similar setups. The whole filament unloading and loading process is multiple times faster, not only because ROME just has to park the filament behind the y-junction. In its native mode, ROME handles the loading and unloading process and skips the slicer controlled part of it. This process is highly optimized for a specific Hotend / Filament combination. No more configuration of cooling moves, skinnydip, ramming, .... 
 
 You can even set the acceleration for the wipe tower, in combination with the slicer **max speed for the wipe tower** feature, you can speed up the process even more.
 
