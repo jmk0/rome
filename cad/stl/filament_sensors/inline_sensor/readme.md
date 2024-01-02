@@ -19,3 +19,6 @@
 - clean the filament path
 - the micro switch orientation matters, make sure the lever points to the small lever pocket
 - make sure the sensor works, you can move it slightly to support more types of switches
+
+
+<img src="1.jpg" alt="" width="800"/>
