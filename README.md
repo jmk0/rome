@@ -1,7 +1,7 @@
 # ROME
 RatOS Multi Extruder
 
-A multi extruder to direct extruder solution for RatOS
+A multi extruder feeder to direct extruder solution for RatOS
 
 ## Table of Content
 - [Intro](#intro)
