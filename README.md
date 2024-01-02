@@ -80,6 +80,8 @@ type: git_repo
 primary_branch: main
 path: ~/rome
 origin: https://github.com/HelgeKeck/rome.git
+is_system_service: False
+managed_services: klipper
 install_script: install.sh
 ```
 
