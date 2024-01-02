@@ -39,7 +39,6 @@ With its **Ooze Ex** feature, it lets you use the most oozing hotends on the mar
 Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simple unload macro. 
 
 <img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/toolhead.jpg" alt="" width="800"/>
 
 Wipe tower, printed with 300mm/s @ 25000 mm²/s acceleration on a Rapido UHF with Prusament PETG. 
 
