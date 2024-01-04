@@ -12,8 +12,6 @@ A multi extruder feeder to direct extruder solution for RatOS
 - [Slicer](#slicer)
     - [G-code](#G-code)
     - [Native](#native)
-- [Hardware](#hardware)
-- [Configuration](#configuration)
 
 ## Printed Parts
   - [Filament Sensor](https://github.com/HelgeKeck/rome/tree/main/cad/stl/filament_sensors)
