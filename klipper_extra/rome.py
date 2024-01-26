@@ -460,7 +460,7 @@ class ROME:
         if self.rome_setup == 0:
 
             # try to filter out false alerts
-            if not self.f_filament_sensor_triggered():
+            if not self.f_filament_sensor_triggered(tool):
                 return True
 
             # check hotend temperature
