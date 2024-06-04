@@ -28,21 +28,21 @@ With its **Ooze Ex** feature, it lets you use the most oozing hotends on the mar
 
 Every MM loading and unloading setting in the slicer will be deactivated and replaced with a simple unload macro. 
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/1.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/rome_top.jpg" alt="" width="800"/>
+<img src="img/1.jpg" alt="" width="800"/>
+<img src="img/rome_top.jpg" alt="" width="800"/>
 
 Wipe tower, printed with 300mm/s @ 25000 mm²/s acceleration on a Rapido UHF with Prusament PETG. 
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower_1.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower_2.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower_3.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower_4.jpg" alt="" width="800"/>
+<img src="img/wipe_tower_1.jpg" alt="" width="800"/>
+<img src="img/wipe_tower_2.jpg" alt="" width="800"/>
+<img src="img/wipe_tower_3.jpg" alt="" width="800"/>
+<img src="img/wipe_tower_4.jpg" alt="" width="800"/>
 
 Examples 
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/sample.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/sample2.jpg" alt="" width="800"/>
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/sample3.jpg" alt="" width="800"/>
+<img src="img/sample.jpg" alt="" width="800"/>
+<img src="img/sample2.jpg" alt="" width="800"/>
+<img src="img/sample3.jpg" alt="" width="800"/>
 
 # Installation
 
@@ -118,55 +118,55 @@ The Native Mode handles the filament loading and unloading on the Wipe tower. Fa
 
 Printer Settings->General
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/advanced.jpg" alt="" width="320"/>
+<img src="img/advanced.jpg" alt="" width="320"/>
 
 
 **Activate additional extruders**
 
 Printer Settings->General
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/capabilities.jpg" alt="" width="387"/>
+<img src="img/capabilities.jpg" alt="" width="387"/>
 
 
 **Dectivate all multi material parameters**
 
 Printer Settings->Single extruder MM setup
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/mmu_parameters.jpg" alt="" width="407"/>
+<img src="img/mmu_parameters.jpg" alt="" width="407"/>
 
 
 **Dectivate advanced wiping volume**
 
 Printer Settings->Single extruder MM setup
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wiping_volume.jpg" alt="" width="462"/>
+<img src="img/wiping_volume.jpg" alt="" width="462"/>
 
 
 **Dectivate toolchange temperature**
 
 Filament Settings->Multimaterial
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/toolchange_temperature.jpg" alt="" width="400"/>
+<img src="img/toolchange_temperature.jpg" alt="" width="400"/>
 
 
 **Dectivate skinnydip string reduction**
 
 Filament Settings->Multimaterial
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/dip.jpg" alt="" width="454"/>
+<img src="img/dip.jpg" alt="" width="454"/>
 
 
 **Dectivate cooling moves and ramming**
 
 Filament Settings->Multimaterial
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/toolchange_parameters.jpg" alt="" width="400"/>
+<img src="img/toolchange_parameters.jpg" alt="" width="400"/>
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/ramming.jpg" alt="" width="764"/>
+<img src="img/ramming.jpg" alt="" width="764"/>
 
 
 **Enable wipe tower**
 
 Print Settings->multiple extruders
 
-<img src="https://github.com/HelgeKeck/rome/blob/main/img/wipe_tower.jpg" alt="" width="584"/>
+<img src="img/wipe_tower.jpg" alt="" width="584"/>
